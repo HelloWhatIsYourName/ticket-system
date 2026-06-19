@@ -36,7 +36,7 @@ backend/
 docs/spikes/phase-5-ticket-workflow.md
 ```
 
-## Task 1: Schema, Domain, Mapper, and Service Foundation
+## Task 1: Schema, Domain, Mapper, and Service Foundation ⭐
 
 **Files:**
 - Create: `backend/src/main/resources/db/migration/V5__ticket_workflow.sql`
@@ -47,11 +47,11 @@ docs/spikes/phase-5-ticket-workflow.md
 - Test: `backend/src/test/java/com/example/aiticket/ticket/mapper/TicketMapperXmlTest.java`
 - Test: `backend/src/test/java/com/example/aiticket/ticket/service/TicketWorkflowServiceTest.java`
 
-- [ ] **Step 1: Write mapper XML and migration tests**
+- [x] **Step 1: Write mapper XML and migration tests**
 
 Create `TicketMapperXmlTest` that reads `V5__ticket_workflow.sql` and `TicketMapper.xml`. Assert the migration defines `ticket`, `ticket_flow_log`, `ticket_category`, `ticket_comment`, status checks, and source AI session foreign keys. Assert mapper XML declares `insertTicket`, `insertFlowLog`, `findOwnedAiSession`, `findLatestAssistantMessage`, and `findTicketForUpdate`.
 
-- [ ] **Step 2: Run mapper test to verify RED**
+- [x] **Step 2: Run mapper test to verify RED**
 
 ```bash
 cd backend
@@ -60,15 +60,15 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/o
 
 Expected: fail because V5 migration and mapper do not exist.
 
-- [ ] **Step 3: Add migration, domain records, mapper interface, and XML**
+- [x] **Step 3: Add migration, domain records, mapper interface, and XML**
 
 Implement V5 tables and sequences. Keep workflow enums as Java enums and Oracle `VARCHAR2` values. Use explicit JDBC types for nullable numeric and text fields.
 
-- [ ] **Step 4: Run mapper test to verify GREEN**
+- [x] **Step 4: Run mapper test to verify GREEN**
 
 Run the same `TicketMapperXmlTest` command. Expected: tests pass.
 
-- [ ] **Step 5: Write service tests**
+- [x] **Step 5: Write service tests**
 
 Create `TicketWorkflowServiceTest` with fake `TicketMapper`. Cover:
 
@@ -77,7 +77,7 @@ Create `TicketWorkflowServiceTest` with fake `TicketMapper`. Cover:
 3. assigning a pending ticket moves it to `PENDING_PROCESS`;
 4. invalid transition throws and does not update status.
 
-- [ ] **Step 6: Run service test to verify RED**
+- [x] **Step 6: Run service test to verify RED**
 
 ```bash
 cd backend
@@ -86,18 +86,18 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/o
 
 Expected: fail because service types do not exist yet.
 
-- [ ] **Step 7: Implement `TicketWorkflowService`**
+- [x] **Step 7: Implement `TicketWorkflowService`**
 
 Implement create-from-AI-session and manual assignment. Generate ticket numbers with `TK` + timestamp + ticket ID. Centralize allowed transitions and log every successful mutation.
 
-- [ ] **Step 8: Run focused Task 1 tests**
+- [x] **Step 8: Run focused Task 1 tests**
 
 ```bash
 cd backend
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo -Dtest=TicketMapperXmlTest,TicketWorkflowServiceTest test
 ```
 
-- [ ] **Step 9: Commit Task 1**
+- [x] **Step 9: Commit Task 1**
 
 ```bash
 git add backend/src/main/resources/db/migration/V5__ticket_workflow.sql backend/src/main/java/com/example/aiticket/ticket backend/src/main/resources/mapper/TicketMapper.xml backend/src/test/java/com/example/aiticket/ticket docs/superpowers/plans/2026-06-20-phase-5-ticket-workflow-implementation-plan.md

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.aiticket.ticket.mapper.TicketMapper">
+    <select id="nextTicketId" resultType="long">
+        SELECT ticket_seq.NEXTVAL FROM dual
+    </select>
+
+    <select id="nextFlowLogId" resultType="long">
+        SELECT ticket_flow_log_seq.NEXTVAL FROM dual
+    </select>
+
+    <select id="findOwnedAiSession" resultType="com.example.aiticket.ai.rag.domain.AiSession">
+        SELECT id, user_id, title, last_question, transfer_suggested, created_at, updated_at
+        FROM ai_session
+        WHERE id = #{sessionId}
+          AND user_id = #{userId}
+    </select>
+
+    <select id="findLatestAssistantMessage" resultType="com.example.aiticket.ai.rag.domain.AiMessage">
+        SELECT id, session_id, user_id, role, content, model_name, can_answer,
+               confidence, transfer_suggested, transfer_reason, created_at
+        FROM ai_message
+        WHERE session_id = #{sessionId}
+          AND user_id = #{userId}
+          AND role = 'ASSISTANT'
+        ORDER BY created_at DESC, id DESC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <select id="findOwnedAssistantMessage" resultType="com.example.aiticket.ai.rag.domain.AiMessage">
+        SELECT id, session_id, user_id, role, content, model_name, can_answer,
+               confidence, transfer_suggested, transfer_reason, created_at
+        FROM ai_message
+        WHERE id = #{messageId}
+          AND session_id = #{sessionId}
+          AND user_id = #{userId}
+          AND role = 'ASSISTANT'
+    </select>
+
+    <insert id="insertTicket">
+        INSERT INTO ticket (
+            id, ticket_no, title, description, status, priority,
+            ai_priority_suggestion, category_id, department_id, creator_id,
+            assignee_id, source, source_session_id, source_message_id,
+            ai_summary, ai_suggestion, transfer_reason, deadline_at
+        )
+        VALUES (
+            #{id}, #{ticketNo}, #{title}, #{description}, #{status}, #{priority},
+            #{aiPrioritySuggestion,jdbcType=VARCHAR}, #{categoryId,jdbcType=NUMERIC},
+            #{departmentId,jdbcType=NUMERIC}, #{creatorId}, #{assigneeId,jdbcType=NUMERIC},
+            #{source}, #{sourceSessionId,jdbcType=NUMERIC}, #{sourceMessageId,jdbcType=NUMERIC},
+            #{aiSummary,jdbcType=VARCHAR}, #{aiSuggestion,jdbcType=CLOB},
+            #{transferReason,jdbcType=VARCHAR}, #{deadlineAt,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <insert id="insertFlowLog">
+        INSERT INTO ticket_flow_log (
+            id, ticket_id, from_status, to_status, action,
+            operator_id, operator_role, comment_text
+        )
+        VALUES (
+            #{id}, #{ticketId}, #{fromStatus,jdbcType=VARCHAR}, #{toStatus}, #{action},
+            #{operatorId}, #{operatorRole,jdbcType=VARCHAR}, #{commentText,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <select id="findTicketForUpdate" resultType="com.example.aiticket.ticket.domain.Ticket">
+        SELECT *
+        FROM ticket
+        WHERE id = #{ticketId}
+          AND deleted = 0
+        FOR UPDATE
+    </select>
+
+    <select id="findCreatedTicket" resultType="com.example.aiticket.ticket.domain.Ticket">
+        SELECT *
+        FROM ticket
+        WHERE id = #{ticketId}
+          AND creator_id = #{creatorId}
+          AND deleted = 0
+    </select>
+
+    <select id="findAssignedTicket" resultType="com.example.aiticket.ticket.domain.Ticket">
+        SELECT *
+        FROM ticket
+        WHERE id = #{ticketId}
+          AND assignee_id = #{assigneeId}
+          AND deleted = 0
+    </select>
+
+    <select id="findTicketById" resultType="com.example.aiticket.ticket.domain.Ticket">
+        SELECT *
+        FROM ticket
+        WHERE id = #{ticketId}
+          AND deleted = 0
+    </select>
+
+    <select id="listCreatedTickets" resultType="com.example.aiticket.ticket.domain.Ticket">
+        SELECT *
+        FROM ticket
+        WHERE creator_id = #{creatorId}
+          AND deleted = 0
+        ORDER BY updated_at DESC, id DESC
+        FETCH FIRST #{limit} ROWS ONLY
+    </select>
+
+    <select id="listAssignedTickets" resultType="com.example.aiticket.ticket.domain.Ticket">
+        SELECT *
+        FROM ticket
+        WHERE assignee_id = #{assigneeId}
+          AND deleted = 0
+        ORDER BY updated_at DESC, id DESC
+        FETCH FIRST #{limit} ROWS ONLY
+    </select>
+
+    <select id="listManagedTickets" resultType="com.example.aiticket.ticket.domain.Ticket">
+        SELECT *
+        FROM ticket
+        WHERE deleted = 0
+        ORDER BY updated_at DESC, id DESC
+        FETCH FIRST #{limit} ROWS ONLY
+    </select>
+
+    <update id="updateTicketStatus">
+        UPDATE ticket
+        SET status = #{status},
+            assignee_id = #{assigneeId,jdbcType=NUMERIC},
+            first_resolved_at = COALESCE(first_resolved_at, #{firstResolvedAt,jdbcType=TIMESTAMP}),
+            closed_at = #{closedAt,jdbcType=TIMESTAMP},
+            reopen_count = reopen_count + #{incrementReopen,jdbcType=NUMERIC},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{ticketId}
+          AND deleted = 0
+    </update>
+</mapper>
