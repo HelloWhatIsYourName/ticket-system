@@ -1049,7 +1049,7 @@ git commit -m "feat: add auth login service"
 - Create: `backend/src/main/java/com/example/aiticket/security/SecurityConfig.java`
 - Modify: `backend/src/main/java/com/example/aiticket/common/api/ApiResponse.java`
 
-- [ ] **Step 1: Implement SecurityConfig**
+- [x] **Step 1: Implement SecurityConfig** ⭐
 
 Security rules:
 
@@ -1084,7 +1084,7 @@ PasswordEncoder passwordEncoder() {
 }
 ```
 
-- [ ] **Step 2: Implement JwtAuthenticationFilter**
+- [x] **Step 2: Implement JwtAuthenticationFilter** ⭐
 
 Filter behavior:
 
@@ -1094,7 +1094,7 @@ Filter behavior:
 4. Reject if token version differs.
 5. Build `UsernamePasswordAuthenticationToken` using `AuthenticatedUser` and `SimpleGrantedAuthority`.
 
-- [ ] **Step 3: Add ApiResponse failure factory**
+- [x] **Step 3: Add ApiResponse failure factory** ⭐
 
 Modify `ApiResponse`:
 
@@ -1104,7 +1104,7 @@ public static <T> ApiResponse<T> fail(String message) {
 }
 ```
 
-- [ ] **Step 4: Run full tests**
+- [x] **Step 4: Run full tests** ⭐
 
 Run:
 
@@ -1119,7 +1119,7 @@ Expected:
 BUILD SUCCESS
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit** ⭐
 
 Run:
 
