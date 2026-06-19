@@ -24,7 +24,7 @@ class AiProviderPropertiesTest {
                     model: deepseek-chat
                   embedding:
                     provider: siliconflow
-                    base-url: https://api.siliconflow.com/v1
+                    base-url: https://api.siliconflow.cn/v1
                     api-key: embedding-key
                     model: Qwen/Qwen3-Embedding-8B
                     dimensions: 1024
@@ -42,7 +42,7 @@ class AiProviderPropertiesTest {
         assertThat(properties.getChat().getProvider()).isEqualTo("deepseek");
         assertThat(properties.getChat().getModel()).isEqualTo("deepseek-chat");
         assertThat(properties.getEmbedding().getProvider()).isEqualTo("siliconflow");
-        assertThat(properties.getEmbedding().getBaseUrl()).isEqualTo("https://api.siliconflow.com/v1");
+        assertThat(properties.getEmbedding().getBaseUrl()).isEqualTo("https://api.siliconflow.cn/v1");
         assertThat(properties.getEmbedding().getModel()).isEqualTo("Qwen/Qwen3-Embedding-8B");
         assertThat(properties.getEmbedding().getDimensions()).isEqualTo(1024);
     }

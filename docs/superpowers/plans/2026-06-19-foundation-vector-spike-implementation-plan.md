@@ -203,7 +203,7 @@ ai:
     model: ${AI_CHAT_MODEL:deepseek-chat}
   embedding:
     provider: siliconflow
-    base-url: ${AI_EMBEDDING_BASE_URL:https://api.siliconflow.com/v1}
+    base-url: ${AI_EMBEDDING_BASE_URL:https://api.siliconflow.cn/v1}
     api-key: ${AI_EMBEDDING_API_KEY:}
     model: ${AI_EMBEDDING_MODEL:Qwen/Qwen3-Embedding-8B}
     dimensions: ${AI_EMBEDDING_DIMENSIONS:1024}
@@ -476,7 +476,7 @@ class AiProviderPropertiesTest {
                     model: deepseek-chat
                   embedding:
                     provider: siliconflow
-                    base-url: https://api.siliconflow.com/v1
+                    base-url: https://api.siliconflow.cn/v1
                     api-key: embedding-key
                     model: Qwen/Qwen3-Embedding-8B
                     dimensions: 1024

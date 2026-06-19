@@ -441,7 +441,7 @@ ai:
     model: deepseek-chat
   embedding:
     provider: siliconflow
-    base-url: https://api.siliconflow.com/v1
+    base-url: https://api.siliconflow.cn/v1
     model: Qwen/Qwen3-Embedding-8B
     dimensions: 1024
 ```

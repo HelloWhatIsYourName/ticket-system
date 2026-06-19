@@ -27,7 +27,7 @@ class SiliconFlowEmbeddingClientTest {
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
         SiliconFlowEmbeddingClient client = new SiliconFlowEmbeddingClient(properties(), builder);
 
-        server.expect(once(), requestTo("https://api.siliconflow.com/v1/embeddings"))
+        server.expect(once(), requestTo("https://api.siliconflow.cn/v1/embeddings"))
                 .andExpect(method(POST))
                 .andExpect(header(AUTHORIZATION, "Bearer test-key"))
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -74,7 +74,7 @@ class SiliconFlowEmbeddingClientTest {
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
         SiliconFlowEmbeddingClient client = new SiliconFlowEmbeddingClient(properties(), builder);
 
-        server.expect(once(), requestTo("https://api.siliconflow.com/v1/embeddings"))
+        server.expect(once(), requestTo("https://api.siliconflow.cn/v1/embeddings"))
                 .andRespond(withSuccess("""
                         {
                           "data": [
@@ -94,7 +94,7 @@ class SiliconFlowEmbeddingClientTest {
         AiProviderProperties properties = new AiProviderProperties();
         AiProviderProperties.EmbeddingProvider embedding = new AiProviderProperties.EmbeddingProvider();
         embedding.setProvider("siliconflow");
-        embedding.setBaseUrl("https://api.siliconflow.com/v1");
+        embedding.setBaseUrl("https://api.siliconflow.cn/v1");
         embedding.setApiKey("test-key");
         embedding.setModel("Qwen/Qwen3-Embedding-8B");
         embedding.setDimensions(3);

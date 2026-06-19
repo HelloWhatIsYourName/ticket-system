@@ -65,7 +65,7 @@ Replace the embedding block and assertions in `backend/src/test/java/com/example
 ```java
                   embedding:
                     provider: siliconflow
-                    base-url: https://api.siliconflow.com/v1
+                    base-url: https://api.siliconflow.cn/v1
                     api-key: embedding-key
                     model: Qwen/Qwen3-Embedding-8B
                     dimensions: 1024
@@ -73,7 +73,7 @@ Replace the embedding block and assertions in `backend/src/test/java/com/example
 
 ```java
         assertThat(properties.getEmbedding().getProvider()).isEqualTo("siliconflow");
-        assertThat(properties.getEmbedding().getBaseUrl()).isEqualTo("https://api.siliconflow.com/v1");
+        assertThat(properties.getEmbedding().getBaseUrl()).isEqualTo("https://api.siliconflow.cn/v1");
         assertThat(properties.getEmbedding().getModel()).isEqualTo("Qwen/Qwen3-Embedding-8B");
         assertThat(properties.getEmbedding().getDimensions()).isEqualTo(1024);
 ```
@@ -102,7 +102,7 @@ Change `backend/src/main/resources/application.yml`:
 ```yaml
   embedding:
     provider: siliconflow
-    base-url: ${AI_EMBEDDING_BASE_URL:https://api.siliconflow.com/v1}
+    base-url: ${AI_EMBEDDING_BASE_URL:https://api.siliconflow.cn/v1}
     api-key: ${AI_EMBEDDING_API_KEY:}
     model: ${AI_EMBEDDING_MODEL:Qwen/Qwen3-Embedding-8B}
     dimensions: ${AI_EMBEDDING_DIMENSIONS:1024}
@@ -177,7 +177,7 @@ class SiliconFlowEmbeddingClientTest {
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
         SiliconFlowEmbeddingClient client = new SiliconFlowEmbeddingClient(properties(), builder);
 
-        server.expect(once(), requestTo("https://api.siliconflow.com/v1/embeddings"))
+        server.expect(once(), requestTo("https://api.siliconflow.cn/v1/embeddings"))
                 .andExpect(method(POST))
                 .andExpect(header(AUTHORIZATION, "Bearer test-key"))
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -224,7 +224,7 @@ class SiliconFlowEmbeddingClientTest {
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
         SiliconFlowEmbeddingClient client = new SiliconFlowEmbeddingClient(properties(), builder);
 
-        server.expect(once(), requestTo("https://api.siliconflow.com/v1/embeddings"))
+        server.expect(once(), requestTo("https://api.siliconflow.cn/v1/embeddings"))
                 .andRespond(withSuccess("""
                         {
                           "data": [
@@ -244,7 +244,7 @@ class SiliconFlowEmbeddingClientTest {
         AiProviderProperties properties = new AiProviderProperties();
         AiProviderProperties.EmbeddingProvider embedding = new AiProviderProperties.EmbeddingProvider();
         embedding.setProvider("siliconflow");
-        embedding.setBaseUrl("https://api.siliconflow.com/v1");
+        embedding.setBaseUrl("https://api.siliconflow.cn/v1");
         embedding.setApiKey("test-key");
         embedding.setModel("Qwen/Qwen3-Embedding-8B");
         embedding.setDimensions(3);
@@ -468,7 +468,7 @@ Use this embedding config wherever the docs show provider defaults:
 ```yaml
   embedding:
     provider: siliconflow
-    base-url: https://api.siliconflow.com/v1
+    base-url: https://api.siliconflow.cn/v1
     api-key: ${AI_EMBEDDING_API_KEY}
     model: Qwen/Qwen3-Embedding-8B
     dimensions: 1024
@@ -479,7 +479,7 @@ If the snippet is copied from `application.yml`, use placeholder-preserving defa
 ```yaml
   embedding:
     provider: siliconflow
-    base-url: ${AI_EMBEDDING_BASE_URL:https://api.siliconflow.com/v1}
+    base-url: ${AI_EMBEDDING_BASE_URL:https://api.siliconflow.cn/v1}
     api-key: ${AI_EMBEDDING_API_KEY:}
     model: ${AI_EMBEDDING_MODEL:Qwen/Qwen3-Embedding-8B}
     dimensions: ${AI_EMBEDDING_DIMENSIONS:1024}

@@ -34,6 +34,7 @@ embedding VECTOR(1024, FLOAT32)
 2. 保持 1024 维可以避免修改 `V1__vector_spike.sql` 和后续知识片段表的向量字段设计。
 3. 硅基流动 Embeddings API 使用 OpenAI-compatible 风格，请求和响应结构与现有客户端实现接近。
 4. 硅基流动官方文档说明 `dimensions` 参数支持 Qwen/Qwen3 Embedding 系列，因此可以把 `Qwen/Qwen3-Embedding-8B` 配置为 1024 维。
+5. 默认 base URL 按硅基流动官方 Embeddings 文档示例使用 `https://api.siliconflow.cn/v1`，并保留 `AI_EMBEDDING_BASE_URL` 环境变量用于后续切换网关或兼容域名。
 
 ## 3. 范围
 
@@ -41,7 +42,7 @@ embedding VECTOR(1024, FLOAT32)
 
 1. 更新默认配置：
    - `ai.embedding.provider=siliconflow`
-   - `ai.embedding.base-url=https://api.siliconflow.com/v1`
+   - `ai.embedding.base-url=https://api.siliconflow.cn/v1`
    - `ai.embedding.model=Qwen/Qwen3-Embedding-8B`
    - `ai.embedding.dimensions=1024`
 2. 将 `AliyunBailianEmbeddingClient` 替换为 `SiliconFlowEmbeddingClient`。
@@ -83,7 +84,7 @@ embedding VECTOR(1024, FLOAT32)
 ai:
   embedding:
     provider: siliconflow
-    base-url: ${AI_EMBEDDING_BASE_URL:https://api.siliconflow.com/v1}
+    base-url: ${AI_EMBEDDING_BASE_URL:https://api.siliconflow.cn/v1}
     api-key: ${AI_EMBEDDING_API_KEY:}
     model: ${AI_EMBEDDING_MODEL:Qwen/Qwen3-Embedding-8B}
     dimensions: ${AI_EMBEDDING_DIMENSIONS:1024}
@@ -192,7 +193,7 @@ live 验证通过后，再更新 `docs/spikes/oracle-vector-spike.md` 和 founda
 ## 8. 验收标准
 
 1. 代码中默认 Embedding provider 为 `siliconflow`。
-2. 默认 base URL 为 `https://api.siliconflow.com/v1`。
+2. 默认 base URL 为 `https://api.siliconflow.cn/v1`。
 3. 默认模型为 `Qwen/Qwen3-Embedding-8B`。
 4. 默认维度仍为 `1024`。
 5. 项目文档不再把阿里百炼描述为第一版 Embedding 供应商。
