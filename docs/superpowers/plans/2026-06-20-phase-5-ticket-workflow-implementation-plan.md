@@ -150,36 +150,36 @@ git add backend/src/main/java/com/example/aiticket/ticket/web backend/src/test/j
 git commit -m "feat: expose ticket workflow api"
 ```
 
-## Task 3: Full Verification and Live Spike
+## Task 3: Full Verification and Live Spike ⭐
 
 **Files:**
 - Create: `docs/spikes/phase-5-ticket-workflow.md`
 - Modify: `docs/superpowers/plans/2026-06-20-phase-5-ticket-workflow-implementation-plan.md`
 
-- [ ] **Step 1: Run all backend tests**
+- [x] **Step 1: Run all backend tests**
 
 ```bash
 cd backend
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo test
 ```
 
-- [ ] **Step 2: Run local backend and verify ticket creation**
+- [x] **Step 2: Run local backend and verify ticket creation**
 
 Use existing admin/user/agent accounts. Create or reuse an AI session, create a ticket from it as `user`, verify `my` list contains it, assign as `admin`, and verify `agent` sees it in assigned tickets.
 
-- [ ] **Step 3: Verify workflow transitions and RBAC**
+- [x] **Step 3: Verify workflow transitions and RBAC**
 
 Verify invalid anonymous calls return `401`, wrong-role operations return `403`, and valid status transitions create flow logs.
 
-- [ ] **Step 4: Record spike report**
+- [x] **Step 4: Record spike report**
 
 Write sanitized evidence to `docs/spikes/phase-5-ticket-workflow.md`.
 
-- [ ] **Step 5: Final diff and plan marking**
+- [x] **Step 5: Final diff and plan marking**
 
 Run `git diff --check`, inspect scope, mark completed tasks with checkboxes and stars.
 
-- [ ] **Step 6: Commit Task 3**
+- [x] **Step 6: Commit Task 3**
 
 ```bash
 git add docs/spikes/phase-5-ticket-workflow.md docs/superpowers/plans/2026-06-20-phase-5-ticket-workflow-implementation-plan.md
