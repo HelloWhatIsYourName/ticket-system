@@ -3,6 +3,7 @@ package com.example.aiticket.ticket.service;
 import com.example.aiticket.ai.rag.domain.AiMessage;
 import com.example.aiticket.ai.rag.domain.AiSession;
 import com.example.aiticket.ticket.domain.Ticket;
+import com.example.aiticket.ticket.domain.TicketDetail;
 import com.example.aiticket.ticket.domain.TicketPriority;
 import com.example.aiticket.ticket.domain.TicketSource;
 import com.example.aiticket.ticket.domain.TicketStatus;
@@ -121,6 +122,11 @@ public class TicketWorkflowService {
             throw new TicketNotFoundException("ticket not found");
         }
         return ticket;
+    }
+
+    public TicketDetail getTicketDetail(Long userId, Long ticketId, boolean canManage, boolean canProcess) {
+        Ticket ticket = getTicket(userId, ticketId, canManage, canProcess);
+        return new TicketDetail(ticket, mapper.listFlowLogs(ticket.id()));
     }
 
     @Transactional

@@ -186,6 +186,50 @@ git add docs/spikes/phase-5-ticket-workflow.md docs/superpowers/plans/2026-06-20
 git commit -m "docs: verify phase 5 ticket workflow"
 ```
 
+## Task 4: Ticket Flow Log Detail Read Model ⭐
+
+**Files:**
+- Modify: `backend/src/main/java/com/example/aiticket/ticket/mapper/TicketMapper.java`
+- Modify: `backend/src/main/resources/mapper/TicketMapper.xml`
+- Create: `backend/src/main/java/com/example/aiticket/ticket/domain/TicketDetail.java`
+- Modify: `backend/src/main/java/com/example/aiticket/ticket/service/TicketWorkflowService.java`
+- Modify: `backend/src/main/java/com/example/aiticket/ticket/web/TicketController.java`
+- Create: `backend/src/main/java/com/example/aiticket/ticket/web/TicketDetailResponse.java`
+- Create: `backend/src/main/java/com/example/aiticket/ticket/web/TicketFlowLogResponse.java`
+- Test: `backend/src/test/java/com/example/aiticket/ticket/mapper/TicketMapperXmlTest.java`
+- Test: `backend/src/test/java/com/example/aiticket/ticket/service/TicketWorkflowServiceTest.java`
+- Test: `backend/src/test/java/com/example/aiticket/ticket/web/TicketControllerTest.java`
+
+- [x] **Step 1: Write failing tests**
+
+Assert mapper XML declares `listFlowLogs`. Assert service `getTicketDetail(...)` returns a visible ticket plus ordered flow logs. Assert controller detail response includes `flowLogs` while list responses stay compact.
+
+- [x] **Step 2: Run focused tests to verify RED**
+
+```bash
+cd backend
+JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo -Dtest=TicketMapperXmlTest,TicketWorkflowServiceTest,TicketControllerTest test
+```
+
+- [x] **Step 3: Implement flow-log read model**
+
+Add `TicketDetail`, `TicketDetailResponse`, and `TicketFlowLogResponse`. Keep writes centralized in `TicketWorkflowService`; flow-log read access must reuse the same visibility checks as ticket detail.
+
+- [x] **Step 4: Run focused and full tests**
+
+```bash
+cd backend
+JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo -Dtest=TicketMapperXmlTest,TicketWorkflowServiceTest,TicketControllerTest test
+JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo test
+```
+
+- [x] **Step 5: Commit Task 4**
+
+```bash
+git add backend/src/main/java/com/example/aiticket/ticket backend/src/main/resources/mapper/TicketMapper.xml backend/src/test/java/com/example/aiticket/ticket docs/superpowers/plans/2026-06-20-phase-5-ticket-workflow-implementation-plan.md
+git commit -m "feat: expose ticket flow log detail"
+```
+
 ## Current Execution Note
 
-This session advances Phase 5 by completing Task 1 first. Task 2 and Task 3 remain next steps after the foundation is committed.
+Task 1, Task 2, and Task 3 are complete. Task 4 adds the read-side flow-log detail needed by frontend ticket detail pages.

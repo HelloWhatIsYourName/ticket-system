@@ -3,6 +3,7 @@ package com.example.aiticket.ticket.mapper;
 import com.example.aiticket.ai.rag.domain.AiMessage;
 import com.example.aiticket.ai.rag.domain.AiSession;
 import com.example.aiticket.ticket.domain.Ticket;
+import com.example.aiticket.ticket.domain.TicketFlowLog;
 import com.example.aiticket.ticket.domain.TicketPriority;
 import com.example.aiticket.ticket.domain.TicketSource;
 import com.example.aiticket.ticket.domain.TicketStatus;
@@ -68,6 +69,8 @@ public interface TicketMapper {
     List<Ticket> listAssignedTickets(@Param("assigneeId") Long assigneeId, @Param("limit") int limit);
 
     List<Ticket> listManagedTickets(@Param("limit") int limit);
+
+    List<TicketFlowLog> listFlowLogs(@Param("ticketId") Long ticketId);
 
     int updateTicketStatus(@Param("ticketId") Long ticketId,
                            @Param("status") TicketStatus status,

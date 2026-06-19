@@ -79,6 +79,7 @@ class TicketControllerTest {
         assertThat(controller.assignedTickets(agent()).data()).hasSize(1);
         assertThat(controller.managedTickets().data()).hasSize(1);
         assertThat(controller.detail(100L, user()).data().id()).isEqualTo(100L);
+        assertThat(controller.detail(100L, user()).data().flowLogs()).hasSize(1);
     }
 
     @Test
@@ -145,6 +146,18 @@ class TicketControllerTest {
         @Override
         public Ticket getTicket(Long userId, Long ticketId, boolean canManage, boolean canProcess) {
             return ticket(TicketStatus.PENDING_ASSIGN, null);
+        }
+
+        @Override
+        public com.example.aiticket.ticket.domain.TicketDetail getTicketDetail(Long userId, Long ticketId,
+                                                                               boolean canManage, boolean canProcess) {
+            return new com.example.aiticket.ticket.domain.TicketDetail(
+                    ticket(TicketStatus.PENDING_ASSIGN, null),
+                    List.of(new com.example.aiticket.ticket.domain.TicketFlowLog(
+                            201L, 100L, null, TicketStatus.PENDING_ASSIGN,
+                            com.example.aiticket.ticket.domain.TicketWorkflowAction.CREATE,
+                            7L, "USER", "创建工单", LocalDateTime.now()))
+            );
         }
 
         @Override

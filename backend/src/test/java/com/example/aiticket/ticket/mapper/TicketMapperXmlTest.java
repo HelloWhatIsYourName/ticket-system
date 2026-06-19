@@ -32,5 +32,6 @@ class TicketMapperXmlTest {
         assertThat(mapper).contains("findLatestAssistantMessage");
         assertThat(mapper).contains("findTicketForUpdate");
         assertThat(mapper).contains("updateTicketStatus");
+        assertThat(mapper).contains("listFlowLogs");
     }
 }

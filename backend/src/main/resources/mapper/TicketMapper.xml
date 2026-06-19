@@ -124,6 +124,14 @@
         FETCH FIRST #{limit} ROWS ONLY
     </select>
 
+    <select id="listFlowLogs" resultType="com.example.aiticket.ticket.domain.TicketFlowLog">
+        SELECT id, ticket_id, from_status, to_status, action,
+               operator_id, operator_role, comment_text, created_at
+        FROM ticket_flow_log
+        WHERE ticket_id = #{ticketId}
+        ORDER BY created_at ASC, id ASC
+    </select>
+
     <update id="updateTicketStatus">
         UPDATE ticket
         SET status = #{status},

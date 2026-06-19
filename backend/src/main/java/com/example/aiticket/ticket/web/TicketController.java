@@ -68,15 +68,14 @@ public class TicketController {
 
     @GetMapping("/{ticketId}")
     @PreAuthorize("hasAnyAuthority('ticket:view:own','ticket:process','ticket:manage')")
-    public ApiResponse<TicketResponse> detail(@PathVariable Long ticketId,
-                                              @AuthenticationPrincipal AuthenticatedUser user) {
-        Ticket ticket = service.getTicket(
+    public ApiResponse<TicketDetailResponse> detail(@PathVariable Long ticketId,
+                                                    @AuthenticationPrincipal AuthenticatedUser user) {
+        return ApiResponse.ok(TicketDetailResponse.from(service.getTicketDetail(
                 user.id(),
                 ticketId,
                 user.permissions().contains("ticket:manage"),
                 user.permissions().contains("ticket:process")
-        );
-        return ApiResponse.ok(TicketResponse.from(ticket));
+        )));
     }
 
     @PostMapping("/{ticketId}/assign")

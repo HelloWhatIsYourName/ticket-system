@@ -4,6 +4,7 @@ import com.example.aiticket.ai.rag.domain.AiMessage;
 import com.example.aiticket.ai.rag.domain.AiMessageRole;
 import com.example.aiticket.ai.rag.domain.AiSession;
 import com.example.aiticket.ticket.domain.Ticket;
+import com.example.aiticket.ticket.domain.TicketFlowLog;
 import com.example.aiticket.ticket.domain.TicketPriority;
 import com.example.aiticket.ticket.domain.TicketSource;
 import com.example.aiticket.ticket.domain.TicketStatus;
@@ -144,6 +145,8 @@ class TicketWorkflowServiceTest {
     @Test
     void listAndDetailHelpersUseCorrectMapperScopes() {
         FakeTicketMapper mapper = new FakeTicketMapper();
+        mapper.flowLogs.add(new TestFlowLog(201L, 100L, TicketStatus.PENDING_ASSIGN,
+                TicketStatus.PENDING_PROCESS, TicketWorkflowAction.ASSIGN, 2L, "ADMIN", "分配"));
         TicketWorkflowService service = new TicketWorkflowService(mapper);
 
         assertThat(service.listCreatedTickets(7L, 100)).hasSize(1);
@@ -152,7 +155,8 @@ class TicketWorkflowServiceTest {
         assertThat(service.getTicket(7L, 100L, false, false).creatorId()).isEqualTo(7L);
         mapper.ticketForUpdate = mapper.ticketForUpdate(TicketStatus.PENDING_PROCESS, 3L);
         assertThat(service.getTicket(3L, 100L, false, true).assigneeId()).isEqualTo(3L);
-        assertThat(service.getTicket(2L, 100L, true, false).id()).isEqualTo(100L);
+        assertThat(service.getTicketDetail(2L, 100L, true, false).ticket().id()).isEqualTo(100L);
+        assertThat(service.getTicketDetail(2L, 100L, true, false).flowLogs()).hasSize(1);
     }
 
     private static final class FakeTicketMapper implements TicketMapper {
@@ -270,6 +274,16 @@ class TicketWorkflowServiceTest {
         @Override
         public List<Ticket> listManagedTickets(int limit) {
             return List.of(ticketForUpdate);
+        }
+
+        @Override
+        public List<TicketFlowLog> listFlowLogs(Long ticketId) {
+            return flowLogs.stream()
+                    .filter(flowLog -> flowLog.ticketId().equals(ticketId))
+                    .map(flowLog -> new TicketFlowLog(flowLog.id(), flowLog.ticketId(), flowLog.fromStatus(),
+                            flowLog.toStatus(), flowLog.action(), flowLog.operatorId(), flowLog.operatorRole(),
+                            flowLog.commentText(), LocalDateTime.now()))
+                    .toList();
         }
 
         @Override
