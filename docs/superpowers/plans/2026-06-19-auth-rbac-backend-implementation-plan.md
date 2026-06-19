@@ -425,7 +425,7 @@ git commit -m "feat: add auth rbac schema"
 - Create: `backend/src/main/java/com/example/aiticket/system/AuditLogService.java`
 - Create: `backend/src/test/java/com/example/aiticket/system/UserAuthorityServiceTest.java`
 
-- [ ] **Step 1: Write authority aggregation test**
+- [x] **Step 1: Write authority aggregation test** ⭐
 
 Create `backend/src/test/java/com/example/aiticket/system/UserAuthorityServiceTest.java`:
 
@@ -466,7 +466,7 @@ class UserAuthorityServiceTest {
 }
 ```
 
-- [ ] **Step 2: Implement records, mapper, and service**
+- [x] **Step 2: Implement records, mapper, and service** ⭐
 
 Create `UserAccount`:
 
@@ -606,7 +606,7 @@ public class AuditLogService {
 }
 ```
 
-- [ ] **Step 3: Add mapper XML**
+- [x] **Step 3: Add mapper XML** ⭐
 
 Create `backend/src/main/resources/mapper/UserSecurityMapper.xml`:
 
@@ -691,7 +691,7 @@ Create `backend/src/main/resources/mapper/UserSecurityMapper.xml`:
 </mapper>
 ```
 
-- [ ] **Step 4: Run focused service test**
+- [x] **Step 4: Run focused service test** ⭐
 
 Run:
 
@@ -706,7 +706,7 @@ Expected:
 BUILD SUCCESS
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit** ⭐
 
 Run:
 
