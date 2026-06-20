@@ -176,6 +176,7 @@ class DocumentationCoverageTest {
 
         String scorer = Files.readString(scorerPath);
         assertThat(scorer).contains("sourceHintAliases");
+        assertThat(scorer).contains("keywordAliases");
         assertThat(scorer).contains("retrievalHit");
         assertThat(scorer).contains("summarizeResults");
 

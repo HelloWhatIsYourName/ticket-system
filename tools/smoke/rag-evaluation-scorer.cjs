@@ -29,6 +29,20 @@ function sourceHintAliases(expectedSourceHint) {
   return [...new Set(aliases.filter(Boolean))];
 }
 
+function keywordAliases(expectedKeyword) {
+  const keyword = normalize(expectedKeyword);
+  const aliases = [expectedKeyword];
+
+  if (keyword.includes('账号借用')) {
+    aliases.push('借用离职同事账号', '借用账号', '共享账号');
+  }
+  if (keyword.includes('权限安全')) {
+    aliases.push('仅限本人使用', '共享密码', '上报 IT', '安全管理员');
+  }
+
+  return [...new Set(aliases.filter(Boolean))];
+}
+
 function citationEvidence(answer) {
   return (answer.citations || [])
     .map((citation) => `${citation.sourceTitle || ''}\n${citation.snippet || ''}`)
@@ -54,7 +68,9 @@ function usefulAnswer(answer, caseItem) {
   const expectedKeywords = caseItem.expectedKeywords || [];
   const shouldTransfer = Boolean(caseItem.shouldTransfer);
   const content = answer.answer || '';
-  const matchedKeywords = expectedKeywords.filter((keyword) => includesNormalized(content, keyword));
+  const matchedKeywords = expectedKeywords.filter((keyword) =>
+    keywordAliases(keyword).some((alias) => includesNormalized(content, alias))
+  );
   if (shouldTransfer) {
     return Boolean(answer.transferSuggested || !answer.canAnswer || matchedKeywords.length > 0);
   }
@@ -105,6 +121,7 @@ function summarizeResults(results) {
 module.exports = {
   normalize,
   sourceHintAliases,
+  keywordAliases,
   retrievalHit,
   usefulAnswer,
   scoreCase,

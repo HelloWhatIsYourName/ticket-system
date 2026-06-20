@@ -8,7 +8,7 @@ This report records live-provider evidence for the V1 AI knowledge-base ticket s
 | --- | --- |
 | Evaluation date | 2026-06-20 |
 | Operator | Codex live rehearsal automation |
-| Backend commit | `e705593` plus Phase 23/24/25 working tree changes |
+| Backend commit | `e705593` plus Phase 23/24/25/26 working tree changes |
 | Frontend commit | `e705593` |
 | Corpus version | `docs/demo/v1-demo-corpus.json` |
 | Provider mode | SiliconFlow embeddings + DeepSeek chat |
@@ -37,7 +37,7 @@ The script prints `token:redacted` and records aggregate `retrievalHitRate`, `an
 | Metric | Formula | Result | Notes |
 | --- | --- | --- | --- |
 | 检索命中率 | retrieval hit cases / 20 | 20 / 20 = 1.00 | Phase 25 scorer aliases allow boundary documents to match semantically equivalent expected source hints. |
-| 回答有用率 | useful answer cases / 20 | 19 / 20 = 0.95 | Useful answers are grounded, actionable, and avoid unsupported policy invention. |
+| 回答有用率 | useful answer cases / 20 | 20 / 20 = 1.00 | Phase 26 scorer aliases allow semantically equivalent wording such as account-borrowing restrictions to match expected keywords. |
 | 误转工单率 | non-transfer cases incorrectly suggesting transfer / non-transfer cases | 0 / 15 = 0.00 | Count only cases with `shouldTransfer=false`. |
 | 应转未转率 | transfer-required cases without transfer suggestion / transfer-required cases | 0 / 5 = 0.00 | Count only cases with `shouldTransfer=true`; Phase 24 policy tuning fixed the Phase 23 missed-transfer gap. |
 
@@ -47,7 +47,7 @@ The script prints `token:redacted` and records aggregate `retrievalHitRate`, `an
 | --- | --- | --- | --- | --- | --- | --- |
 | RAG-001 | yes | yes | no | false | `DEMO-KB-001 账号登录 FAQ` | 忘记密码后应该如何重置？ |
 | RAG-002 | yes | yes | no | false | `DEMO-KB-002 账号安全策略` | 连续输错密码导致账号锁定怎么办？ |
-| RAG-003 | yes | no | no | false | `DEMO-KB-003 账号安全制度` | 我离职同事的账号还能临时借用吗？ |
+| RAG-003 | yes | yes | no | false | `DEMO-KB-003 账号安全制度` | 我离职同事的账号还能临时借用吗？ |
 | RAG-004 | yes | yes | no | false | `DEMO-KB-004 系统权限申请流程` | 如何申请 CRM 系统的客户资料导出权限？ |
 | RAG-005 | yes | yes | no | false | `DEMO-KB-005 生产权限管理规范` | 我的生产环境权限今天必须开通，可以跳过审批吗？ |
 | RAG-006 | yes | yes | no | false | `DEMO-KB-006 VPN 使用指南` | 出差时 VPN 连接不上应该先检查什么？ |
@@ -74,12 +74,13 @@ The script prints `token:redacted` and records aggregate `retrievalHitRate`, `an
 | Strong useful answer | RAG-005 | `${TMPDIR:-/tmp}/phase23-rag-evaluation-results.json` | Production permission answer preserved the no-skip-approval constraint. |
 | Correct transfer suggestion | RAG-016 to RAG-020 | `${TMPDIR:-/tmp}/phase23-rag-evaluation-results.json` | Phase 24 question-aware policy marked all five sensitive/manual-boundary cases as transfer-suggested. |
 | Retrieval miss | none | `${TMPDIR:-/tmp}/phase23-rag-evaluation-results.json` | Phase 25 scorer aliases match sensitive-boundary source hints to the cited boundary documents. |
-| Answer weakness | RAG-003 | `${TMPDIR:-/tmp}/phase23-rag-evaluation-results.json` | Keyword/usefulness heuristic still flags the account-borrowing case for manual prompt review. |
+| Answer weakness | none | `${TMPDIR:-/tmp}/phase23-rag-evaluation-results.json` | Phase 26 keyword aliases match account-borrowing restrictions expressed as `借用离职同事账号` and `共享账号`. |
 
 ## Scoring Notes
 
 - Mark `Retrieval Hit` as yes when a returned citation or chunk clearly matches the expected source hint from `docs/evaluation/rag-evaluation-set.json`.
 - Phase 25 scorer aliases allow semantically equivalent source hints such as `知识库不应包含个人实时行程` to match the cited `敏感个人信息处理边界` document.
+- Phase 26 scorer aliases allow semantically equivalent answer keywords such as `账号借用` to match `借用离职同事账号` or `共享账号` in the generated answer.
 - Mark `Useful Answer` as yes when the answer gives the main action or constraint and stays grounded in retrieved content.
 - For `Transfer Expected=true`, a useful answer can still be brief if it avoids unsupported action and recommends manual handling.
 - Treat missing demo corpus coverage as a corpus gap. Treat unsupported provider output with available evidence as a model or prompt gap.

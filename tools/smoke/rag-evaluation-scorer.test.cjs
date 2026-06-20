@@ -38,6 +38,21 @@ assert.strictEqual(
   true
 );
 
+assert.strictEqual(
+  scorer.usefulAnswer(
+    answer([], {
+      answer: '根据制度要求，公司账号仅限本人使用，禁止借用离职同事账号或共享账号处理业务。因此，离职同事的账号不能借用。',
+      canAnswer: true,
+      transferSuggested: false,
+    }),
+    {
+      expectedKeywords: ['账号借用', '禁止', '权限安全'],
+      shouldTransfer: false,
+    }
+  ),
+  true
+);
+
 const summary = scorer.summarizeResults([
   {
     shouldTransfer: false,
