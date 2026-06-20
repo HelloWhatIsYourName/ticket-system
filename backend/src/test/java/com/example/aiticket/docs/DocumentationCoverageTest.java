@@ -16,8 +16,10 @@ class DocumentationCoverageTest {
 
         assertThat(script).contains("/api/auth/login");
         assertThat(script).contains("/api/auth/me");
-        assertThat(script).contains("/api/knowledge/documents/text");
-        assertThat(script).contains("/api/knowledge/search");
+        assertThat(script).contains("/api/kb/documents/text");
+        assertThat(script).contains("/api/kb/search");
+        assertThat(script).doesNotContain("/api/knowledge/documents/text");
+        assertThat(script).doesNotContain("/api/knowledge/search");
         assertThat(script).contains("/api/ai/chat/ask");
         assertThat(script).contains("/api/tickets/from-ai-session");
         assertThat(script).contains("/api/admin/statistics/overview");

@@ -120,12 +120,12 @@ INSERT INTO sys_permission (id, permission_code, permission_name, module, descri
 INSERT INTO sys_permission (id, permission_code, permission_name, module, description) VALUES (13, 'ticket:manage', '管理工单', 'ticket', '管理全部工单');
 INSERT INTO sys_permission (id, permission_code, permission_name, module, description) VALUES (14, 'dashboard:view', '查看统计看板', 'dashboard', '查看基础统计看板');
 
-INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (1, 'chat', 'AI 问答', '/chat', 'views/chat/index', 'ai:chat:ask', 'MessageCircle', 1);
-INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (2, 'tickets', '我的工单', '/tickets', 'views/tickets/index', 'ticket:view:own', 'Ticket', 2);
-INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (3, 'agent-workbench', '坐席工作台', '/agent/tickets', 'views/agent/tickets', 'ticket:process', 'Briefcase', 3);
-INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (4, 'knowledge', '知识库管理', '/admin/knowledge', 'views/admin/knowledge', 'knowledge:document:manage', 'Folder', 4);
-INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (5, 'users', '用户权限管理', '/admin/users', 'views/admin/users', 'system:user:manage', 'Users', 5);
-INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (6, 'dashboard', '统计看板', '/admin/dashboard', 'views/admin/dashboard', 'dashboard:view', 'ChartColumn', 6);
+INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (1, 'chat', 'AI 问答', '/app/ai/chat', 'views/ai/chat', 'ai:chat:ask', 'MessageCircle', 1);
+INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (2, 'tickets', '我的工单', '/app/tickets/my', 'views/tickets/my', 'ticket:view:own', 'Ticket', 2);
+INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (3, 'agent-workbench', '坐席工作台', '/app/tickets/assigned', 'views/tickets/assigned', 'ticket:process', 'Briefcase', 3);
+INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (4, 'knowledge', '知识库管理', '/app/knowledge', 'views/knowledge', 'knowledge:document:manage', 'Folder', 4);
+INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (5, 'users', '用户权限管理', '/app/system', 'views/system', 'system:user:manage', 'Users', 5);
+INSERT INTO sys_menu (id, menu_code, menu_name, route_path, component, permission_code, icon, sort_order) VALUES (6, 'dashboard', '统计看板', '/app/admin/dashboard', 'views/admin/dashboard', 'dashboard:view', 'ChartColumn', 6);
 
 INSERT INTO sys_user (id, username, password_hash, display_name, status, token_version) VALUES (1, 'superadmin', '$2a$10$8wEayODt4hidF3affYdSaOy1Zl2N2R.zfyPUIAS8Xce9Llb.817Vm', '超级管理员', 'ACTIVE', 0);
 INSERT INTO sys_user (id, username, password_hash, display_name, status, token_version) VALUES (2, 'admin', '$2a$10$8wEayODt4hidF3affYdSaOy1Zl2N2R.zfyPUIAS8Xce9Llb.817Vm', '系统管理员', 'ACTIVE', 0);

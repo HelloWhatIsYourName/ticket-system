@@ -1,13 +1,28 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import EmptyState from '../../components/common/EmptyState.vue'
 import ErrorState from '../../components/common/ErrorState.vue'
 import LoadingState from '../../components/common/LoadingState.vue'
-import { listMyTickets, type TicketPriority, type TicketStatus, type TicketSummary } from '../../api/tickets'
+import {
+  listAssignedTickets,
+  listMyTickets,
+  type TicketPriority,
+  type TicketStatus,
+  type TicketSummary
+} from '../../api/tickets'
 
+const route = useRoute()
 const tickets = ref<TicketSummary[]>([])
 const loading = ref(true)
 const error = ref('')
+const isAssignedMode = computed(() => route.name === 'assigned-tickets')
+const pageTitle = computed(() => (isAssignedMode.value ? '分配给我的工单' : '我的工单'))
+const pageDescription = computed(() =>
+  isAssignedMode.value ? '坐席需要处理的问题会在这里继续推进' : '从 AI 会话转入的问题会在这里继续跟踪'
+)
+const emptyMessage = computed(() => (isAssignedMode.value ? '暂无分配给你的工单' : '暂无工单'))
+const tableLabel = computed(() => (isAssignedMode.value ? '分配给我的工单列表' : '我的工单列表'))
 
 const statusLabel: Record<TicketStatus, string> = {
   PENDING: '待处理',
@@ -43,15 +58,20 @@ function formatDate(value?: string) {
   return value.replace('T', ' ').slice(0, 16)
 }
 
-onMounted(async () => {
+async function loadTickets() {
+  loading.value = true
+  error.value = ''
   try {
-    tickets.value = await listMyTickets()
+    tickets.value = isAssignedMode.value ? await listAssignedTickets() : await listMyTickets()
   } catch (err) {
+    tickets.value = []
     error.value = err instanceof Error ? err.message : '工单加载失败'
   } finally {
     loading.value = false
   }
-})
+}
+
+watch(() => route.name, loadTickets, { immediate: true })
 </script>
 
 <template>
@@ -59,16 +79,16 @@ onMounted(async () => {
     <header class="workspace-page-header">
       <div>
         <p>Ticket workspace</p>
-        <h3>我的工单</h3>
+        <h3>{{ pageTitle }}</h3>
       </div>
-      <span>从 AI 会话转入的问题会在这里继续跟踪</span>
+      <span>{{ pageDescription }}</span>
     </header>
 
     <LoadingState v-if="loading" message="正在加载工单" />
     <ErrorState v-else-if="error" :message="error" />
-    <EmptyState v-else-if="tickets.length === 0" message="暂无工单" />
+    <EmptyState v-else-if="tickets.length === 0" :message="emptyMessage" />
 
-    <section v-else class="ticket-table" aria-label="我的工单列表">
+    <section v-else class="ticket-table" :aria-label="tableLabel">
       <div class="ticket-row ticket-row-head">
         <span>编号</span>
         <span>标题</span>

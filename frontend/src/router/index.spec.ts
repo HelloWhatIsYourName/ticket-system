@@ -12,6 +12,14 @@ describe('routes', () => {
     expect(appRoute?.meta?.requiresAuth).toBe(true)
   })
 
+  it('exposes assigned tickets inside the app shell', () => {
+    const appRoute = routes.find((route) => route.path === '/app')
+
+    expect(appRoute?.children?.map((route) => route.path)).toEqual(
+      expect.arrayContaining(['tickets/assigned'])
+    )
+  })
+
   it('redirects anonymous app navigation to login with redirect query', async () => {
     await expect(
       resolveAuthNavigation(

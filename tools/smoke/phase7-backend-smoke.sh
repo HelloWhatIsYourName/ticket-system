@@ -75,9 +75,9 @@ printf 'userLogin 200 token:redacted\n'
 printf 'agentLogin 200 token:redacted\n'
 
 check authMe 200 GET /api/auth/me "$ADMIN_TOKEN"
-check createTextDocument 200 POST /api/knowledge/documents/text "$ADMIN_TOKEN" '{"title":"Phase 7 Smoke FAQ","content":"Phase 7 smoke verification password reset answer: users can reset a forgotten password from the login page by selecting forgot password and following the verification flow.","categoryId":1}'
+check createTextDocument 200 POST /api/kb/documents/text "$ADMIN_TOKEN" '{"title":"Phase 7 Smoke FAQ","content":"Phase 7 smoke verification password reset answer: users can reset a forgotten password from the login page by selecting forgot password and following the verification flow.","categoryId":1}'
 DOCUMENT_ID=$(json_get "$BODY_FILE" data.id)
-check knowledgeSearch 200 POST /api/knowledge/search "$USER_TOKEN" '{"query":"How do I reset a forgotten password?","topK":3}'
+check knowledgeSearch 200 POST /api/kb/search "$USER_TOKEN" '{"query":"How do I reset a forgotten password?","topK":3}'
 check ragAsk 200 POST /api/ai/chat/ask "$USER_TOKEN" '{"question":"How do I reset a forgotten password?"}'
 SESSION_ID=$(json_get "$BODY_FILE" data.sessionId)
 check createTicket 200 POST /api/tickets/from-ai-session "$USER_TOKEN" "{\"sessionId\":$SESSION_ID,\"title\":\"Phase 7 smoke ticket\",\"description\":\"Need manual confirmation after smoke ask\",\"categoryId\":1,\"priority\":\"MEDIUM\"}"

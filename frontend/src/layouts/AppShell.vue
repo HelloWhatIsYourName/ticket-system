@@ -12,6 +12,7 @@ const fallbackMenus = [
   { code: 'ai-chat', name: 'AI 问答', path: '/app/ai/chat' },
   { code: 'knowledge-base', name: '知识库', path: '/app/knowledge' },
   { code: 'my-tickets', name: '我的工单', path: '/app/tickets/my' },
+  { code: 'assigned-tickets', name: '分配给我', path: '/app/tickets/assigned' },
   { code: 'admin-dashboard', name: '管理概览', path: '/app/admin/dashboard' },
   { code: 'system-admin', name: '系统管理', path: '/app/system' }
 ]
