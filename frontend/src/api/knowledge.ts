@@ -37,6 +37,12 @@ export interface CreateTextDocumentRequest {
   content: string
 }
 
+export interface UploadKnowledgeDocumentRequest {
+  file: File
+  title?: string
+  categoryId?: number
+}
+
 export interface SearchKnowledgeRequest {
   query: string
   categoryId?: number
@@ -52,6 +58,21 @@ export async function listDocuments(): Promise<KnowledgeDocument[]> {
 
 export async function createTextDocument(request: CreateTextDocumentRequest): Promise<KnowledgeDocument> {
   const response = await http.post<ApiResponse<KnowledgeDocument>>('/kb/documents/text', request)
+
+  return unwrapData(response.data)
+}
+
+export async function uploadKnowledgeDocument(request: UploadKnowledgeDocumentRequest): Promise<KnowledgeDocument> {
+  const formData = new FormData()
+  formData.append('file', request.file)
+  if (request.title) {
+    formData.append('title', request.title)
+  }
+  if (request.categoryId !== undefined) {
+    formData.append('categoryId', String(request.categoryId))
+  }
+
+  const response = await http.post<ApiResponse<KnowledgeDocument>>('/kb/documents/upload', formData)
 
   return unwrapData(response.data)
 }

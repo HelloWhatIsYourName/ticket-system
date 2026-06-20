@@ -17,6 +17,14 @@ public interface KnowledgeDocumentMapper {
                            @Param("fileSize") long fileSize,
                            @Param("uploadedBy") Long uploadedBy);
 
+    int insertDocument(@Param("id") Long id,
+                       @Param("title") String title,
+                       @Param("categoryId") Long categoryId,
+                       @Param("fileName") String fileName,
+                       @Param("fileType") String fileType,
+                       @Param("fileSize") long fileSize,
+                       @Param("uploadedBy") Long uploadedBy);
+
     KnowledgeDocument findById(@Param("id") Long id);
 
     List<KnowledgeDocument> findRecent(@Param("limit") int limit);

@@ -79,7 +79,7 @@ Expected result:
 parseStatus = PARSED
 ```
 
-For the full demo, use the corpus in `docs/demo/v1-demo-corpus.json`. Each item can be entered through `/app/knowledge` using `title`, `categoryId`, and `content`. The companion guide is `docs/demo/v1-demo-corpus.md`.
+For the full demo, use the corpus in `docs/demo/v1-demo-corpus.json`. Each item can be entered through `/app/knowledge` using `title`, `categoryId`, and `content`, or saved as a small `.txt` / `.md` file and uploaded through the same page. The companion guide is `docs/demo/v1-demo-corpus.md`.
 
 For the shortest path, open `/app/knowledge`, create the password reset document above, then run 检索测试 with:
 

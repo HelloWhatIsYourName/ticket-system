@@ -20,8 +20,17 @@ public class KnowledgeDocumentService {
 
     public Long createTextDocument(String title, Long categoryId, String content, Long uploadedBy) {
         int fileSize = content == null ? 0 : content.getBytes(StandardCharsets.UTF_8).length;
+        return createDocument(title, categoryId, title, "TEXT", fileSize, uploadedBy);
+    }
+
+    public Long createDocument(String title,
+                               Long categoryId,
+                               String fileName,
+                               String fileType,
+                               long fileSize,
+                               Long uploadedBy) {
         Long documentId = documentMapper.nextDocumentId();
-        documentMapper.insertTextDocument(documentId, title, categoryId, fileSize, uploadedBy);
+        documentMapper.insertDocument(documentId, title, categoryId, fileName, fileType, fileSize, uploadedBy);
         parseQueue.enqueueParseAndEmbed(documentId, 0);
         return documentId;
     }

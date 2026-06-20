@@ -7,6 +7,7 @@ import {
   createTextDocument,
   listDocuments,
   searchKnowledge,
+  uploadKnowledgeDocument,
   type KnowledgeDocument,
   type KnowledgeSearchResult
 } from '../../api/knowledge'
@@ -16,10 +17,13 @@ const results = ref<KnowledgeSearchResult[]>([])
 const loading = ref(true)
 const error = ref('')
 const creating = ref(false)
+const uploading = ref(false)
 const searching = ref(false)
 const title = ref('')
 const categoryId = ref(1)
 const content = ref('')
+const selectedFile = ref<File | null>(null)
+const uploadMessage = ref('')
 const query = ref('')
 const topK = ref(5)
 const minSimilarity = ref(0.2)
@@ -72,6 +76,36 @@ async function submitDocument() {
     await refreshDocuments()
   } finally {
     creating.value = false
+  }
+}
+
+function handleFileChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  selectedFile.value = input.files?.[0] ?? null
+  uploadMessage.value = ''
+}
+
+async function submitUpload() {
+  if (!selectedFile.value || uploading.value) {
+    return
+  }
+
+  uploading.value = true
+  uploadMessage.value = ''
+
+  try {
+    await uploadKnowledgeDocument({
+      file: selectedFile.value,
+      title: title.value.trim() || undefined,
+      categoryId: categoryId.value
+    })
+    title.value = ''
+    content.value = ''
+    selectedFile.value = null
+    uploadMessage.value = '文件已上传并开始解析'
+    await refreshDocuments()
+  } finally {
+    uploading.value = false
   }
 }
 
@@ -166,6 +200,22 @@ onMounted(loadDocuments)
             {{ creating ? '录入中...' : '录入知识' }}
           </button>
         </form>
+
+        <div class="knowledge-form upload-form">
+          <label>
+            文件上传
+            <input
+              data-testid="document-file"
+              type="file"
+              accept=".txt,.md,.markdown,text/plain,text/markdown"
+              @change="handleFileChange"
+            />
+          </label>
+          <button data-testid="upload-document" type="button" :disabled="uploading || !selectedFile" @click="submitUpload">
+            {{ uploading ? '上传中...' : '上传文件' }}
+          </button>
+          <p v-if="uploadMessage" class="form-hint">{{ uploadMessage }}</p>
+        </div>
       </section>
 
       <section class="knowledge-panel">

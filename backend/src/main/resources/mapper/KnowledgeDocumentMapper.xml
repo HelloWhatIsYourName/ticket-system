@@ -18,6 +18,17 @@
         )
     </insert>
 
+    <insert id="insertDocument">
+        INSERT INTO kb_document (
+            id, title, category_id, file_name, storage_name, file_type, file_size,
+            enabled, parse_status, retry_count, uploaded_by
+        )
+        VALUES (
+            #{id}, #{title}, #{categoryId}, #{fileName}, NULL, #{fileType}, #{fileSize},
+            1, 'PENDING_PARSE', 0, #{uploadedBy}
+        )
+    </insert>
+
     <select id="findById" resultType="com.example.aiticket.knowledge.domain.KnowledgeDocument">
         SELECT id, title, category_id, file_name, storage_name, file_type, file_size,
                enabled, parse_status, parse_error, retry_count, uploaded_by,

@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { http } from './http'
-import { createTextDocument, listDocumentChunks, listDocuments, searchKnowledge } from './knowledge'
+import {
+  createTextDocument,
+  listDocumentChunks,
+  listDocuments,
+  searchKnowledge,
+  uploadKnowledgeDocument
+} from './knowledge'
 
 vi.mock('./http', async () => {
   const actual = await vi.importActual<typeof import('./http')>('./http')
@@ -53,6 +59,28 @@ describe('knowledge api', () => {
       content: '重置密码步骤',
       categoryId: 1
     })
+  })
+
+  it('uploads text-like knowledge files as multipart form data', async () => {
+    postMock.mockResolvedValueOnce({
+      data: {
+        success: true,
+        data: { id: 3, title: '账号政策', parseStatus: 'PARSED', enabled: true },
+        message: 'ok'
+      }
+    })
+    const file = new File(['重置密码步骤'], 'policy.md', { type: 'text/markdown' })
+
+    await expect(uploadKnowledgeDocument({ file, title: '账号政策', categoryId: 1 })).resolves.toMatchObject({
+      id: 3,
+      title: '账号政策'
+    })
+
+    expect(postMock).toHaveBeenCalledWith('/kb/documents/upload', expect.any(FormData))
+    const formData = postMock.mock.calls[0][1] as FormData
+    expect(formData.get('file')).toBe(file)
+    expect(formData.get('title')).toBe('账号政策')
+    expect(formData.get('categoryId')).toBe('1')
   })
 
   it('searches knowledge chunks', async () => {

@@ -191,6 +191,17 @@ class KnowledgeIngestionServiceTest {
         }
 
         @Override
+        public int insertDocument(Long id,
+                                  String title,
+                                  Long categoryId,
+                                  String fileName,
+                                  String fileType,
+                                  long fileSize,
+                                  Long uploadedBy) {
+            return 1;
+        }
+
+        @Override
         public KnowledgeDocument findById(Long id) {
             return new KnowledgeDocument(id, "测试文档", 1L, "测试文档", null, "TEXT", 30L, true,
                     KnowledgeParseStatus.PENDING_PARSE, null, 0, 1L, LocalDateTime.now(), LocalDateTime.now(), false);

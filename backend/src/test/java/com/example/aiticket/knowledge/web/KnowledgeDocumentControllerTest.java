@@ -15,8 +15,10 @@ import com.example.aiticket.knowledge.service.KnowledgeIngestionService;
 import com.example.aiticket.security.AuthenticatedUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,73 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class KnowledgeDocumentControllerTest {
+    @Test
+    void uploadMarkdownDocumentStoresMetadataAndIngestsUtf8Content() {
+        FakeDocumentMapper documentMapper = new FakeDocumentMapper();
+        RecordingIngestionService ingestionService = new RecordingIngestionService();
+        KnowledgeDocumentController controller = new KnowledgeDocumentController(
+                new KnowledgeDocumentService(documentMapper, new NoopParseQueue()),
+                ingestionService,
+                new FakeChunkMapper()
+        );
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "policy.md",
+                "text/markdown",
+                "密码重置步骤".getBytes(StandardCharsets.UTF_8)
+        );
+
+        ApiResponse<DocumentResponse> response = controller.uploadDocument(file, "账号政策", 1L, user());
+
+        assertThat(response.success()).isTrue();
+        assertThat(response.data().id()).isEqualTo(10L);
+        assertThat(documentMapper.fileName).isEqualTo("policy.md");
+        assertThat(documentMapper.fileType).isEqualTo("MARKDOWN");
+        assertThat(ingestionService.documentId).isEqualTo(10L);
+        assertThat(ingestionService.title).isEqualTo("账号政策");
+        assertThat(ingestionService.categoryId).isEqualTo(1L);
+        assertThat(ingestionService.text).isEqualTo("密码重置步骤");
+    }
+
+    @Test
+    void uploadRejectsUnsupportedFileExtension() {
+        KnowledgeDocumentController controller = new KnowledgeDocumentController(
+                new KnowledgeDocumentService(new FakeDocumentMapper(), new NoopParseQueue()),
+                new RecordingIngestionService(),
+                new FakeChunkMapper()
+        );
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "policy.pdf",
+                "application/pdf",
+                "pdf".getBytes(StandardCharsets.UTF_8)
+        );
+
+        assertThatThrownBy(() -> controller.uploadDocument(file, "账号政策", 1L, user()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("unsupported");
+    }
+
+    @Test
+    void uploadRejectsOversizedFile() {
+        KnowledgeDocumentController controller = new KnowledgeDocumentController(
+                new KnowledgeDocumentService(new FakeDocumentMapper(), new NoopParseQueue()),
+                new RecordingIngestionService(),
+                new FakeChunkMapper()
+        );
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "large.txt",
+                "text/plain",
+                "a".repeat(200_001).getBytes(StandardCharsets.UTF_8)
+        );
+
+        assertThatThrownBy(() -> controller.uploadDocument(file, null, 1L, user()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("too large");
+    }
+
     @Test
     void createTextDocumentReturnsFailedDocumentWhenSynchronousIngestionFails() {
         FakeDocumentMapper documentMapper = new FakeDocumentMapper();
@@ -94,10 +163,19 @@ class KnowledgeDocumentControllerTest {
                 CreateTextDocumentRequest.class,
                 AuthenticatedUser.class
         );
+        Method upload = KnowledgeDocumentController.class.getMethod(
+                "uploadDocument",
+                org.springframework.web.multipart.MultipartFile.class,
+                String.class,
+                Long.class,
+                AuthenticatedUser.class
+        );
         Method enable = KnowledgeDocumentController.class.getMethod("enable", Long.class);
         Method chunks = KnowledgeDocumentController.class.getMethod("chunks", Long.class);
 
         assertThat(create.getAnnotation(PreAuthorize.class).value())
+                .isEqualTo("hasAuthority('knowledge:document:upload')");
+        assertThat(upload.getAnnotation(PreAuthorize.class).value())
                 .isEqualTo("hasAuthority('knowledge:document:upload')");
         assertThat(enable.getAnnotation(PreAuthorize.class).value())
                 .isEqualTo("hasAuthority('knowledge:document:manage')");
@@ -135,6 +213,25 @@ class KnowledgeDocumentControllerTest {
         }
     }
 
+    private static final class RecordingIngestionService extends KnowledgeIngestionService {
+        private Long documentId;
+        private String title;
+        private Long categoryId;
+        private String text;
+
+        private RecordingIngestionService() {
+            super(null, null, null, null, null, null);
+        }
+
+        @Override
+        public void ingestText(Long documentId, String title, Long categoryId, String text) {
+            this.documentId = documentId;
+            this.title = title;
+            this.categoryId = categoryId;
+            this.text = text;
+        }
+    }
+
     private static final class FailingIngestionService extends KnowledgeIngestionService {
         private final FakeDocumentMapper documentMapper;
 
@@ -167,6 +264,8 @@ class KnowledgeDocumentControllerTest {
         private long nextId = 10L;
         private KnowledgeParseStatus status = KnowledgeParseStatus.PENDING_PARSE;
         private final List<Long> insertedIds = new ArrayList<>();
+        private String fileName;
+        private String fileType;
 
         @Override
         public Long nextDocumentId() {
@@ -175,7 +274,20 @@ class KnowledgeDocumentControllerTest {
 
         @Override
         public int insertTextDocument(Long id, String title, Long categoryId, long fileSize, Long uploadedBy) {
+            return insertDocument(id, title, categoryId, title, "TEXT", fileSize, uploadedBy);
+        }
+
+        @Override
+        public int insertDocument(Long id,
+                                  String title,
+                                  Long categoryId,
+                                  String fileName,
+                                  String fileType,
+                                  long fileSize,
+                                  Long uploadedBy) {
             insertedIds.add(id);
+            this.fileName = fileName;
+            this.fileType = fileType;
             return 1;
         }
 

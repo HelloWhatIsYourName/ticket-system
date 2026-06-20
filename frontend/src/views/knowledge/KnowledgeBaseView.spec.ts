@@ -1,17 +1,19 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import KnowledgeBaseView from './KnowledgeBaseView.vue'
-import { createTextDocument, listDocuments, searchKnowledge } from '../../api/knowledge'
+import { createTextDocument, listDocuments, searchKnowledge, uploadKnowledgeDocument } from '../../api/knowledge'
 
 vi.mock('../../api/knowledge', () => ({
   createTextDocument: vi.fn(),
   listDocuments: vi.fn(),
-  searchKnowledge: vi.fn()
+  searchKnowledge: vi.fn(),
+  uploadKnowledgeDocument: vi.fn()
 }))
 
 const listDocumentsMock = vi.mocked(listDocuments)
 const createTextDocumentMock = vi.mocked(createTextDocument)
 const searchKnowledgeMock = vi.mocked(searchKnowledge)
+const uploadKnowledgeDocumentMock = vi.mocked(uploadKnowledgeDocument)
 
 describe('KnowledgeBaseView', () => {
   it('renders documents, creates text documents, and displays search results', async () => {
@@ -36,6 +38,16 @@ describe('KnowledgeBaseView', () => {
           retryCount: 0
         }
       ])
+      .mockResolvedValueOnce([
+        {
+          id: 3,
+          title: '上传政策',
+          categoryId: 1,
+          enabled: true,
+          parseStatus: 'PARSED',
+          retryCount: 0
+        }
+      ])
     createTextDocumentMock.mockResolvedValue({
       id: 2,
       title: '密码手册',
@@ -54,6 +66,14 @@ describe('KnowledgeBaseView', () => {
         similarity: 0.91
       }
     ])
+    uploadKnowledgeDocumentMock.mockResolvedValue({
+      id: 3,
+      title: '上传政策',
+      categoryId: 1,
+      enabled: true,
+      parseStatus: 'PARSED',
+      retryCount: 0
+    })
 
     const wrapper = mount(KnowledgeBaseView)
     await flushPromises()
@@ -72,6 +92,23 @@ describe('KnowledgeBaseView', () => {
     expect(createTextDocumentMock).toHaveBeenCalledWith({
       title: '密码手册',
       content: '重置密码步骤',
+      categoryId: 1
+    })
+
+    await wrapper.find('[data-testid="document-title"]').setValue('上传政策')
+    const fileInput = wrapper.find('[data-testid="document-file"]')
+    const file = new File(['文件上传内容'], 'policy.md', { type: 'text/markdown' })
+    Object.defineProperty(fileInput.element, 'files', {
+      value: [file],
+      configurable: true
+    })
+    await fileInput.trigger('change')
+    await wrapper.find('[data-testid="upload-document"]').trigger('click')
+    await flushPromises()
+
+    expect(uploadKnowledgeDocumentMock).toHaveBeenCalledWith({
+      file,
+      title: '上传政策',
       categoryId: 1
     })
 
