@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.aiticket.admin.statistics.mapper.AdminStatisticsMapper">
+    <select id="selectOverview" resultType="com.example.aiticket.admin.statistics.domain.AdminDashboardOverview">
+        SELECT
+          (SELECT COUNT(*) FROM ticket WHERE deleted = 0) AS total_tickets,
+          (SELECT COUNT(*) FROM ticket WHERE deleted = 0 AND status IN ('PENDING_ASSIGN', 'PENDING_PROCESS')) AS pending_tickets,
+          (SELECT COUNT(*) FROM ticket WHERE deleted = 0 AND status = 'PROCESSING') AS processing_tickets,
+          (SELECT COUNT(*) FROM ticket WHERE deleted = 0 AND status = 'RESOLVED') AS resolved_tickets,
+          (SELECT COUNT(*) FROM ticket WHERE deleted = 0 AND status = 'CLOSED') AS closed_tickets,
+          COALESCE((SELECT AVG((CAST(first_resolved_at AS DATE) - CAST(created_at AS DATE)) * 24)
+                    FROM ticket
+                    WHERE deleted = 0 AND first_resolved_at IS NOT NULL), 0) AS average_resolve_hours,
+          (SELECT COUNT(*) FROM kb_document WHERE deleted = 0) AS knowledge_documents,
+          (SELECT COUNT(*) FROM ai_message WHERE role = 'USER') AS ai_questions,
+          COALESCE((SELECT AVG(CASE WHEN max_similarity >= 0.70 THEN 1 ELSE 0 END)
+                    FROM ai_message
+                    WHERE role = 'ASSISTANT' AND max_similarity IS NOT NULL), 0) AS knowledge_hit_rate
+        FROM dual
+    </select>
+
+    <select id="selectTicketCategoryStats" resultType="com.example.aiticket.admin.statistics.domain.TicketCategoryStat">
+        SELECT t.category_id,
+               COALESCE(c.name, '未分类') AS category_name,
+               COUNT(*) AS ticket_count
+        FROM ticket t
+        LEFT JOIN ticket_category c ON c.id = t.category_id
+        WHERE t.deleted = 0
+        GROUP BY t.category_id, COALESCE(c.name, '未分类')
+        ORDER BY ticket_count DESC, category_name ASC
+        FETCH FIRST #{limit} ROWS ONLY
+    </select>
+
+    <select id="selectHotQuestions" resultType="com.example.aiticket.admin.statistics.domain.HotQuestionStat">
+        SELECT TRIM(content) AS question,
+               COUNT(*) AS ask_count
+        FROM ai_message
+        WHERE role = 'USER'
+          AND content IS NOT NULL
+        GROUP BY LOWER(TRIM(content)), TRIM(content)
+        ORDER BY ask_count DESC, question ASC
+        FETCH FIRST #{limit} ROWS ONLY
+    </select>
+</mapper>

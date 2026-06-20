@@ -45,7 +45,7 @@ backend/
 docs/spikes/phase-6-admin-dashboard.md
 ```
 
-## Task 1: Admin Statistics Read Model
+## Task 1: Admin Statistics Read Model ⭐
 
 **Files:**
 - Create: `backend/src/main/java/com/example/aiticket/admin/statistics/domain/AdminDashboardOverview.java`
@@ -57,7 +57,7 @@ docs/spikes/phase-6-admin-dashboard.md
 - Test: `backend/src/test/java/com/example/aiticket/admin/statistics/mapper/AdminStatisticsMapperXmlTest.java`
 - Test: `backend/src/test/java/com/example/aiticket/admin/statistics/service/AdminStatisticsServiceTest.java`
 
-- [ ] **Step 1: Write mapper XML tests**
+- [x] **Step 1: Write mapper XML tests**
 
 Create `AdminStatisticsMapperXmlTest` that reads `AdminStatisticsMapper.xml` and asserts it declares:
 
@@ -71,7 +71,7 @@ FROM ticket
 FROM ai_message
 ```
 
-- [ ] **Step 2: Run mapper test to verify RED**
+- [x] **Step 2: Run mapper test to verify RED**
 
 ```bash
 cd backend
@@ -80,7 +80,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/o
 
 Expected: fail because `AdminStatisticsMapper.xml` does not exist.
 
-- [ ] **Step 3: Add domain records and mapper interface**
+- [x] **Step 3: Add domain records and mapper interface**
 
 Create records:
 
@@ -115,7 +115,7 @@ List<TicketCategoryStat> selectTicketCategoryStats(@Param("limit") int limit);
 List<HotQuestionStat> selectHotQuestions(@Param("limit") int limit);
 ```
 
-- [ ] **Step 4: Add Oracle aggregation XML**
+- [x] **Step 4: Add Oracle aggregation XML**
 
 Implement `AdminStatisticsMapper.xml` with:
 
@@ -139,11 +139,11 @@ FROM dual
 
 Use category aggregation from `ticket` left joined to `ticket_category`. Use hot question aggregation from `ai_message` where `role = 'USER'`, grouping by `LOWER(TRIM(content))`.
 
-- [ ] **Step 5: Write service tests**
+- [x] **Step 5: Write service tests**
 
 Create `AdminStatisticsServiceTest` with a fake mapper. Assert `overview()` returns mapper data and `ticketCategoryStats(0)` / `hotQuestions(0)` normalize limits to `10`, while values over `50` cap at `50`.
 
-- [ ] **Step 6: Run service test to verify RED**
+- [x] **Step 6: Run service test to verify RED**
 
 ```bash
 cd backend
@@ -152,7 +152,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/o
 
 Expected: fail because `AdminStatisticsService` does not exist.
 
-- [ ] **Step 7: Implement service**
+- [x] **Step 7: Implement service**
 
 Create `AdminStatisticsService` with methods:
 
@@ -164,14 +164,14 @@ public List<HotQuestionStat> hotQuestions(int limit)
 
 Normalize list limits with default `10` and max `50`.
 
-- [ ] **Step 8: Run focused Task 1 tests**
+- [x] **Step 8: Run focused Task 1 tests**
 
 ```bash
 cd backend
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo -Dtest=AdminStatisticsMapperXmlTest,AdminStatisticsServiceTest test
 ```
 
-- [ ] **Step 9: Commit Task 1**
+- [x] **Step 9: Commit Task 1**
 
 ```bash
 git add backend/src/main/java/com/example/aiticket/admin/statistics backend/src/main/resources/mapper/AdminStatisticsMapper.xml backend/src/test/java/com/example/aiticket/admin/statistics docs/superpowers/plans/2026-06-20-phase-6-admin-dashboard-implementation-plan.md
