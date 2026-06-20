@@ -9,6 +9,7 @@ MIN_SIMILARITY="${MIN_SIMILARITY:-0.2}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 EVALUATION_SET_PATH="${EVALUATION_SET_PATH:-$REPO_ROOT/docs/evaluation/rag-evaluation-set.json}"
+SCORER_PATH="${SCORER_PATH:-$REPO_ROOT/tools/smoke/rag-evaluation-scorer.cjs}"
 RESULTS_PATH="${RESULTS_PATH:-${TMPDIR:-/tmp}/phase23-rag-evaluation-results.json}"
 TMP_DIR="${TMPDIR:-/tmp}"
 BODY_FILE="$TMP_DIR/phase23-rag-evaluation-response.json"
@@ -54,6 +55,7 @@ printf 'phase23RagEvaluation start token:redacted dataset=%s\n' "$EVALUATION_SET
 export BASE_URL
 export USER_TOKEN
 export EVALUATION_SET_PATH
+export SCORER_PATH
 export RESULTS_PATH
 export TOP_K
 export MIN_SIMILARITY
@@ -61,6 +63,7 @@ export MIN_SIMILARITY
 node --input-type=commonjs <<'NODE'
 const fs = require('fs');
 const path = require('path');
+const scorer = require(process.env.SCORER_PATH);
 
 const baseUrl = process.env.BASE_URL.replace(/\/$/, '');
 const token = process.env.USER_TOKEN;
@@ -72,42 +75,6 @@ const cases = JSON.parse(fs.readFileSync(datasetPath, 'utf8'));
 
 if (!Array.isArray(cases)) {
   throw new Error('evaluation set must be an array');
-}
-
-function normalize(value) {
-  return String(value || '').toLowerCase().replace(/\s+/g, '');
-}
-
-function includesNormalized(haystack, needle) {
-  return normalize(haystack).includes(normalize(needle));
-}
-
-function citationEvidence(answer) {
-  return (answer.citations || [])
-    .map((citation) => `${citation.sourceTitle || ''}\n${citation.snippet || ''}`)
-    .join('\n');
-}
-
-function retrievalHit(answer, expectedSourceHint) {
-  const evidence = citationEvidence(answer);
-  if (includesNormalized(evidence, expectedSourceHint)) {
-    return true;
-  }
-  return (answer.citations || []).some((citation) => {
-    const title = citation.sourceTitle || '';
-    return includesNormalized(expectedSourceHint, title)
-      || includesNormalized(title, expectedSourceHint)
-      || normalize(expectedSourceHint).split('或').some((part) => part && includesNormalized(title, part));
-  });
-}
-
-function usefulAnswer(answer, expectedKeywords, shouldTransfer) {
-  const content = answer.answer || '';
-  const matchedKeywords = expectedKeywords.filter((keyword) => includesNormalized(content, keyword));
-  if (shouldTransfer) {
-    return Boolean(answer.transferSuggested || !answer.canAnswer || matchedKeywords.length > 0);
-  }
-  return matchedKeywords.length >= Math.max(1, Math.ceil(expectedKeywords.length / 2));
 }
 
 async function ask(caseItem) {
@@ -139,6 +106,7 @@ const results = [];
 for (const caseItem of cases) {
   const response = await ask(caseItem);
   if (response.status !== 200) {
+    const scores = scorer.scoreCase({}, caseItem, response.status);
     results.push({
       id: caseItem.id,
       question: caseItem.question,
@@ -146,20 +114,15 @@ for (const caseItem of cases) {
       expectedSourceHint: caseItem.expectedSourceHint,
       shouldTransfer: caseItem.shouldTransfer,
       error: response.body,
-      scores: {
-        retrievalHit: false,
-        usefulAnswer: false,
-        transferSuggested: false,
-        transferExpected: caseItem.shouldTransfer,
-      },
+      transferSuggested: false,
+      scores,
     });
     console.log(`ragCase ${caseItem.id} status=${response.status} retrievalHit=false usefulAnswer=false transferSuggested=false`);
     continue;
   }
 
   const answer = response.body.data || {};
-  const hit = retrievalHit(answer, caseItem.expectedSourceHint);
-  const useful = usefulAnswer(answer, caseItem.expectedKeywords || [], caseItem.shouldTransfer);
+  const scores = scorer.scoreCase(answer, caseItem, response.status);
   const transferSuggested = Boolean(answer.transferSuggested);
   results.push({
     id: caseItem.id,
@@ -180,30 +143,12 @@ for (const caseItem of cases) {
       similarity: citation.similarity,
       snippet: citation.snippet,
     })),
-    scores: {
-      retrievalHit: hit,
-      usefulAnswer: useful,
-      transferSuggested,
-      transferExpected: caseItem.shouldTransfer,
-    },
+    scores,
   });
-  console.log(`ragCase ${caseItem.id} status=${response.status} retrievalHit=${hit} usefulAnswer=${useful} transferSuggested=${transferSuggested}`);
+  console.log(`ragCase ${caseItem.id} status=${response.status} retrievalHit=${scores.retrievalHit} usefulAnswer=${scores.usefulAnswer} transferSuggested=${transferSuggested}`);
 }
 
-const total = results.length;
-const nonTransferCases = results.filter((result) => !result.shouldTransfer);
-const transferCases = results.filter((result) => result.shouldTransfer);
-const retrievalHits = results.filter((result) => result.scores.retrievalHit).length;
-const usefulAnswers = results.filter((result) => result.scores.usefulAnswer).length;
-const wrongTransfers = nonTransferCases.filter((result) => result.transferSuggested).length;
-const missedTransfers = transferCases.filter((result) => !result.transferSuggested).length;
-
-function rate(count, denominator) {
-  if (denominator === 0) {
-    return 0;
-  }
-  return Number((count / denominator).toFixed(4));
-}
+const summary = scorer.summarizeResults(results);
 
 const output = {
   metadata: {
@@ -214,17 +159,7 @@ const output = {
     minSimilarity,
     token: 'redacted',
   },
-  summary: {
-    totalCases: total,
-    retrievalHits,
-    usefulAnswers,
-    wrongTransfers,
-    missedTransfers,
-    retrievalHitRate: rate(retrievalHits, total),
-    answerUsefulRate: rate(usefulAnswers, total),
-    wrongTransferRate: rate(wrongTransfers, nonTransferCases.length),
-    missedTransferRate: rate(missedTransfers, transferCases.length),
-  },
+  summary,
   cases: results,
 };
 

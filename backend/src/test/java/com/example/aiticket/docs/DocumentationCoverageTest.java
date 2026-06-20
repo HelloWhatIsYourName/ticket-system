@@ -135,11 +135,15 @@ class DocumentationCoverageTest {
     void phase23DemoCorpusAndRagEvaluationScriptsAreRepeatableAndSecretSafe() throws Exception {
         Path loadScriptPath = Path.of("../tools/smoke/phase23-load-demo-corpus.sh");
         Path evaluationScriptPath = Path.of("../tools/smoke/phase23-run-rag-evaluation.sh");
+        Path scorerPath = Path.of("../tools/smoke/rag-evaluation-scorer.cjs");
+        Path scorerTestPath = Path.of("../tools/smoke/rag-evaluation-scorer.test.cjs");
         Path reportPath = Path.of("../docs/evaluation/rag-live-evaluation-report.md");
         Path datasetPath = Path.of("../docs/evaluation/rag-evaluation-set.json");
 
         assertThat(loadScriptPath).exists();
         assertThat(evaluationScriptPath).exists();
+        assertThat(scorerPath).exists();
+        assertThat(scorerTestPath).exists();
         assertThat(reportPath).exists();
         assertThat(datasetPath).exists();
 
@@ -162,12 +166,18 @@ class DocumentationCoverageTest {
         assertThat(evaluationScript).contains("answerUsefulRate");
         assertThat(evaluationScript).contains("wrongTransferRate");
         assertThat(evaluationScript).contains("missedTransferRate");
+        assertThat(evaluationScript).contains("SCORER_PATH");
         assertThat(evaluationScript).contains("node --input-type=commonjs <<'NODE'");
         assertThat(evaluationScript).contains("main().catch");
         assertThat(evaluationScript).contains("token:redacted");
         assertThat(evaluationScript).doesNotContain("echo \"$USER_TOKEN\"");
         assertThat(evaluationScript).doesNotContain("echo \"$AI_CHAT_API_KEY\"");
         assertThat(evaluationScript).doesNotContain("echo \"$AI_EMBEDDING_API_KEY\"");
+
+        String scorer = Files.readString(scorerPath);
+        assertThat(scorer).contains("sourceHintAliases");
+        assertThat(scorer).contains("retrievalHit");
+        assertThat(scorer).contains("summarizeResults");
 
         String report = Files.readString(reportPath);
         assertThat(report).contains("tools/smoke/phase23-load-demo-corpus.sh");
