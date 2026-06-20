@@ -26,7 +26,7 @@ class TicketWorkflowServiceTest {
     @Test
     void createFromAiSessionInsertsTicketAndCreateFlowLog() {
         FakeTicketMapper mapper = new FakeTicketMapper();
-        TicketWorkflowService service = new TicketWorkflowService(mapper);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
 
         Ticket ticket = service.createFromAiSession(7L, "USER", new CreateTicketFromAiSessionCommand(
                 10L,
@@ -54,7 +54,7 @@ class TicketWorkflowServiceTest {
     void createFromAiSessionRejectsSessionNotOwnedByUser() {
         FakeTicketMapper mapper = new FakeTicketMapper();
         mapper.ownedSession = null;
-        TicketWorkflowService service = new TicketWorkflowService(mapper);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
 
         assertThatThrownBy(() -> service.createFromAiSession(7L, "USER", new CreateTicketFromAiSessionCommand(
                 99L, null, "标题", "描述", 1L, TicketPriority.NORMAL, "原因"
@@ -69,7 +69,7 @@ class TicketWorkflowServiceTest {
     @Test
     void assignPendingTicketMovesItToPendingProcessAndLogsAction() {
         FakeTicketMapper mapper = new FakeTicketMapper();
-        TicketWorkflowService service = new TicketWorkflowService(mapper);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
 
         Ticket ticket = service.assign(2L, "ADMIN", 100L, 3L, "分配给演示坐席");
 
@@ -83,10 +83,27 @@ class TicketWorkflowServiceTest {
     }
 
     @Test
+    void assignDelegatesAssigneeSelectionToStrategy() {
+        FakeTicketMapper mapper = new FakeTicketMapper();
+        RecordingAssignmentStrategy strategy = new RecordingAssignmentStrategy(4L);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, strategy);
+
+        Ticket ticket = service.assign(2L, "ADMIN", 100L, 3L, "策略覆盖为坐席 4");
+
+        assertThat(strategy.context.ticket().id()).isEqualTo(100L);
+        assertThat(strategy.context.operatorId()).isEqualTo(2L);
+        assertThat(strategy.context.operatorRole()).isEqualTo("ADMIN");
+        assertThat(strategy.context.requestedAssigneeId()).isEqualTo(3L);
+        assertThat(strategy.context.comment()).isEqualTo("策略覆盖为坐席 4");
+        assertThat(ticket.assigneeId()).isEqualTo(4L);
+        assertThat(mapper.updatedAssigneeId).isEqualTo(4L);
+    }
+
+    @Test
     void assignRejectsTicketThatIsNotPendingAssign() {
         FakeTicketMapper mapper = new FakeTicketMapper();
         mapper.ticketForUpdate = mapper.ticketForUpdate(TicketStatus.PROCESSING, null);
-        TicketWorkflowService service = new TicketWorkflowService(mapper);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
 
         assertThatThrownBy(() -> service.assign(2L, "ADMIN", 100L, 3L, "重复分配"))
                 .isInstanceOf(TicketWorkflowException.class)
@@ -100,7 +117,7 @@ class TicketWorkflowServiceTest {
     void agentCanStartAndResolveAssignedTicket() {
         FakeTicketMapper mapper = new FakeTicketMapper();
         mapper.ticketForUpdate = mapper.ticketForUpdate(TicketStatus.PENDING_PROCESS, 3L);
-        TicketWorkflowService service = new TicketWorkflowService(mapper);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
 
         Ticket processing = service.startProcessing(3L, "AGENT", 100L, "开始处理");
         assertThat(processing.status()).isEqualTo(TicketStatus.PROCESSING);
@@ -117,7 +134,7 @@ class TicketWorkflowServiceTest {
     void userCanReopenAndConfirmResolvedOwnTicket() {
         FakeTicketMapper mapper = new FakeTicketMapper();
         mapper.ticketForUpdate = mapper.ticketForUpdate(TicketStatus.RESOLVED, 3L);
-        TicketWorkflowService service = new TicketWorkflowService(mapper);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
 
         Ticket reopened = service.reopen(7L, "USER", 100L, "问题仍未解决");
         assertThat(reopened.status()).isEqualTo(TicketStatus.PROCESSING);
@@ -136,7 +153,7 @@ class TicketWorkflowServiceTest {
     void adminCanCloseProcessingTicket() {
         FakeTicketMapper mapper = new FakeTicketMapper();
         mapper.ticketForUpdate = mapper.ticketForUpdate(TicketStatus.PROCESSING, 3L);
-        TicketWorkflowService service = new TicketWorkflowService(mapper);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
 
         Ticket closed = service.close(2L, "ADMIN", 100L, "无效工单");
 
@@ -150,7 +167,7 @@ class TicketWorkflowServiceTest {
         FakeTicketMapper mapper = new FakeTicketMapper();
         mapper.flowLogs.add(new TestFlowLog(201L, 100L, TicketStatus.PENDING_ASSIGN,
                 TicketStatus.PENDING_PROCESS, TicketWorkflowAction.ASSIGN, 2L, "ADMIN", "分配"));
-        TicketWorkflowService service = new TicketWorkflowService(mapper);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
 
         assertThat(service.listCreatedTickets(7L, 100)).hasSize(1);
         assertThat(service.listAssignedTickets(3L, 100)).hasSize(1);
@@ -166,7 +183,7 @@ class TicketWorkflowServiceTest {
     void creatorCanAddUserReplyAndOnlySeesExternalComments() {
         FakeTicketMapper mapper = new FakeTicketMapper();
         mapper.comments.add(new TestComment(301L, 100L, 3L, TicketCommentType.INTERNAL_NOTE, "内部排查备注", true));
-        TicketWorkflowService service = new TicketWorkflowService(mapper);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
 
         TicketComment comment = service.addComment(7L, "USER", 100L, false, false,
                 new AddTicketCommentCommand(TicketCommentType.USER_REPLY, "我补充一下手机号后四位。"));
@@ -184,7 +201,7 @@ class TicketWorkflowServiceTest {
     void assignedAgentCanAddReplyAndInternalNoteAndSeesInternalComments() {
         FakeTicketMapper mapper = new FakeTicketMapper();
         mapper.ticketForUpdate = mapper.ticketForUpdate(TicketStatus.PROCESSING, 3L);
-        TicketWorkflowService service = new TicketWorkflowService(mapper);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
 
         TicketComment reply = service.addComment(3L, "AGENT", 100L, false, true,
                 new AddTicketCommentCommand(TicketCommentType.AGENT_REPLY, "已经帮你提交人工核验。"));
@@ -201,7 +218,7 @@ class TicketWorkflowServiceTest {
     @Test
     void ordinaryCreatorCannotAddInternalNoteOrAgentReply() {
         FakeTicketMapper mapper = new FakeTicketMapper();
-        TicketWorkflowService service = new TicketWorkflowService(mapper);
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
 
         assertThatThrownBy(() -> service.addComment(7L, "USER", 100L, false, false,
                 new AddTicketCommentCommand(TicketCommentType.INTERNAL_NOTE, "普通用户不能写内部备注")))
@@ -417,6 +434,21 @@ class TicketWorkflowServiceTest {
 
     private record TestComment(Long id, Long ticketId, Long authorId, TicketCommentType commentType,
                                String content, boolean internal) {
+    }
+
+    private static final class RecordingAssignmentStrategy implements AssignmentStrategy {
+        private final Long selectedAssigneeId;
+        private TicketAssignmentContext context;
+
+        private RecordingAssignmentStrategy(Long selectedAssigneeId) {
+            this.selectedAssigneeId = selectedAssigneeId;
+        }
+
+        @Override
+        public Long selectAssignee(TicketAssignmentContext context) {
+            this.context = context;
+            return selectedAssigneeId;
+        }
     }
 
 }

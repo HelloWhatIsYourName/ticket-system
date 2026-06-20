@@ -148,7 +148,7 @@ class TicketControllerTest {
         private AddTicketCommentCommand lastCommentCommand;
 
         private FakeTicketWorkflowService() {
-            super(null);
+            super(null, new com.example.aiticket.ticket.service.ManualAssignmentStrategy());
         }
 
         @Override

@@ -23,9 +23,11 @@ public class TicketWorkflowService {
     private static final DateTimeFormatter TICKET_NO_TIME = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     private final TicketMapper mapper;
+    private final AssignmentStrategy assignmentStrategy;
 
-    public TicketWorkflowService(TicketMapper mapper) {
+    public TicketWorkflowService(TicketMapper mapper, AssignmentStrategy assignmentStrategy) {
         this.mapper = mapper;
+        this.assignmentStrategy = assignmentStrategy;
     }
 
     @Transactional
@@ -79,9 +81,6 @@ public class TicketWorkflowService {
 
     @Transactional
     public Ticket assign(Long operatorId, String operatorRole, Long ticketId, Long assigneeId, String comment) {
-        if (assigneeId == null) {
-            throw new TicketWorkflowException("assignee is required");
-        }
         Ticket current = mapper.findTicketForUpdate(ticketId);
         if (current == null) {
             throw new TicketNotFoundException("ticket not found");
@@ -90,10 +89,13 @@ public class TicketWorkflowService {
             throw new TicketWorkflowException("ticket status " + current.status() + " does not allow ASSIGN");
         }
 
-        mapper.updateTicketStatus(ticketId, TicketStatus.PENDING_PROCESS, assigneeId, null, null, 0);
+        Long selectedAssigneeId = assignmentStrategy.selectAssignee(
+                new TicketAssignmentContext(current, operatorId, operatorRole, assigneeId, comment));
+
+        mapper.updateTicketStatus(ticketId, TicketStatus.PENDING_PROCESS, selectedAssigneeId, null, null, 0);
         insertFlow(ticketId, current.status(), TicketStatus.PENDING_PROCESS, TicketWorkflowAction.ASSIGN,
                 operatorId, operatorRole, comment);
-        return copy(current, TicketStatus.PENDING_PROCESS, assigneeId, null, null, 0);
+        return copy(current, TicketStatus.PENDING_PROCESS, selectedAssigneeId, null, null, 0);
     }
 
     public List<Ticket> listCreatedTickets(Long creatorId, int limit) {
