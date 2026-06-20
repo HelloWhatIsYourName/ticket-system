@@ -71,7 +71,7 @@ public class RagChatService {
         double threshold = minSimilarity == null
                 ? knowledgeProperties.getRetrieval().getMinSimilarity()
                 : minSimilarity;
-        RagPolicyDecision decision = answerPolicy.decide(results, chatResult, threshold);
+        RagPolicyDecision decision = answerPolicy.decide(results, chatResult, threshold, question.trim());
 
         Long assistantMessageId = mapper.nextMessageId();
         mapper.insertMessage(assistantMessageId, resolvedSessionId, userId, AiMessageRole.ASSISTANT,
