@@ -8,6 +8,7 @@ const router = useRouter()
 
 const displayName = computed(() => auth.user?.displayName || auth.user?.username || '未登录用户')
 const fallbackMenus = [
+  { code: 'demo-guide', name: '演示导览', path: '/app/demo' },
   { code: 'ai-chat', name: 'AI 问答', path: '/app/ai/chat' },
   { code: 'knowledge-base', name: '知识库', path: '/app/knowledge' },
   { code: 'my-tickets', name: '我的工单', path: '/app/tickets/my' },

@@ -1,6 +1,6 @@
 # V1 Demo Runbook
 
-This runbook prepares a 10-15 minute defense demo for the AI knowledge-base ticket system. It assumes the backend, Oracle 23ai, Redis, and AI provider or mock provider are available.
+This runbook prepares a 10-15 minute defense demo for the AI knowledge-base ticket system. It assumes the backend, frontend, Oracle 23ai, Redis, and AI provider or mock provider are available.
 
 ## 1. Environment Startup
 
@@ -27,6 +27,21 @@ BASE_URL=http://127.0.0.1:8080 tools/smoke/phase7-backend-smoke.sh
 
 The script prints `token:redacted` and must not expose JWT values.
 
+Start the frontend in another terminal:
+
+```bash
+cd frontend
+npm run dev
+```
+
+Open the printed Vite URL, then use the app route:
+
+```text
+/app/demo
+```
+
+The `/app/demo` page is the frontend checklist for the defense path and links to every implemented product screen.
+
 ## 2. Login and RBAC
 
 Demo accounts:
@@ -41,8 +56,10 @@ Show:
 
 1. `admin` login succeeds.
 2. `user` login succeeds.
-3. Anonymous admin request returns `401`.
-4. `user` calling admin users or 统计 endpoint returns `403`.
+3. Direct access to `/app/...` without a token redirects to `/login?redirect=...`.
+4. Refreshing `/app/...` restores the current user through `/api/auth/me`.
+5. Anonymous admin request returns `401`.
+6. `user` calling admin users or 统计 endpoint returns `403`.
 
 This demonstrates RBAC and method-level permission enforcement.
 
@@ -59,10 +76,10 @@ Category: 通用问题
 Expected result:
 
 ```text
-parseStatus = PARSE_SUCCESS
+parseStatus = PARSED
 ```
 
-Then search the 知识库 as `user` with:
+In the frontend, open `/app/knowledge`, create the text document, then run 检索测试 with:
 
 ```text
 忘记密码后应该如何重置？
@@ -72,7 +89,7 @@ Expected result: at least one chunk contains password reset guidance.
 
 ## 4. RAG Question
 
-As `user`, ask:
+Open `/app/ai/chat` as `user` and ask:
 
 ```text
 忘记密码后应该如何重置？
@@ -81,14 +98,14 @@ As `user`, ask:
 Show:
 
 1. RAG returns an answer grounded in the knowledge document.
-2. Response includes citations or related chunks.
+2. Response includes 引用来源 cards.
 3. The answer does not expose raw vector fields.
 
 For thesis evaluation, compare this question against `docs/evaluation/rag-evaluation-set.json` and record 检索命中, 回答有用率, and whether transfer behavior is correct.
 
 ## 5. Manual Transfer to Ticket
 
-Create a 工单 from the AI session when the user still needs manual confirmation.
+Use the right-side `转为工单` form on `/app/ai/chat` when the user still needs manual confirmation.
 
 Expected fields:
 
@@ -98,7 +115,7 @@ sourceSessionId = AI session id
 ticketNo is present
 ```
 
-Show that the user can see the ticket in `my` tickets.
+Show that the user can see the ticket in `/app/tickets/my` and open the detail page.
 
 ## 6. Admin Assignment
 
@@ -110,7 +127,7 @@ Expected transition:
 PENDING_ASSIGN -> PENDING_PROCESS
 ```
 
-Show that the admin can also open the 统计 overview:
+Show that the admin can also open `/app/admin/dashboard`:
 
 ```text
 totalTickets
@@ -126,10 +143,10 @@ This connects 工单 operations with management 统计.
 
 As `agent`:
 
-1. Open assigned tickets.
-2. Start processing.
+1. Open `/app/tickets/my` or the linked ticket detail if assigned.
+2. Start processing from the ticket detail page.
 3. Add an internal note if needed.
-4. Resolve the ticket.
+4. Resolve the ticket from the ticket detail page.
 
 Expected transitions:
 
@@ -154,22 +171,24 @@ RESOLVED -> CLOSED
 
 This demonstrates the user-side feedback loop currently implemented through `ticket_comment` and ticket workflow actions.
 
-## 9. Admin Management Screens / APIs
+## 9. Admin Management Screens
 
-Show these backend capabilities, even before frontend pages are connected:
+Show these implemented frontend screens:
 
-| Area | Endpoint Family | Demo Point |
+| Area | Frontend Route | Demo Point |
 | --- | --- | --- |
-| 用户管理 | `/api/admin/users` | list, enable, disable |
-| 角色权限 | `/api/admin/roles`, `/api/admin/permissions` | role and permission visibility |
-| 工单分类 | `/api/ticket-categories` | category list and management |
-| 统计 | `/api/admin/statistics/*` | overview, category stats, hot questions |
-| Redis | queue design and runtime dependency | document parsing queue and future hot ranking |
+| 演示导览 | `/app/demo` | clickable defense path |
+| 知识库 | `/app/knowledge` | text ingestion and retrieval test |
+| AI 问答 | `/app/ai/chat` | answer, citations, transfer form |
+| 工单 | `/app/tickets/my`, `/app/tickets/:id` | list, detail, replies, notes, workflow actions |
+| 统计 | `/app/admin/dashboard` | overview, category stats, hot questions |
+| 用户角色权限 | `/app/system` | list, enable/disable, role assignment, permission visibility |
+| Redis | runtime dependency | document parsing queue and future hot ranking |
 
 ## 10. Closing Narrative
 
 End the demo with this summary:
 
 ```text
-The system implements the first-version backend loop: RBAC login, 知识库 ingestion, RAG answer with citations, transfer to 工单, agent workflow, user feedback, and admin 统计. Phase 7 adds repeatable smoke verification, a RAG evaluation set, and acceptance evidence for thesis writing. Frontend Vue3 + Element Plus + ECharts integration remains the next presentation layer.
+The system implements the first-version end-to-end loop: RBAC login with session restore, 知识库 ingestion and retrieval, RAG answer with citations, transfer to 工单, ticket comments and workflow actions, admin 统计, and system role management. The frontend now provides the demonstration path, while backend smoke scripts and the RAG evaluation set remain the repeatable verification evidence.
 ```

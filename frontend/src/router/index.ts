@@ -31,7 +31,12 @@ export const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'app-home',
-        component: PlaceholderView
+        component: () => import('../views/demo/DemoGuideView.vue')
+      },
+      {
+        path: 'demo',
+        name: 'demo-guide',
+        component: () => import('../views/demo/DemoGuideView.vue')
       },
       {
         path: 'admin/dashboard',
