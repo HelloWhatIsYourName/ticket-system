@@ -178,7 +178,7 @@ git add backend/src/main/java/com/example/aiticket/admin/statistics backend/src/
 git commit -m "feat: add admin statistics read model"
 ```
 
-## Task 2: Admin Statistics REST API
+## Task 2: Admin Statistics REST API ⭐
 
 **Files:**
 - Create: `backend/src/main/java/com/example/aiticket/admin/statistics/web/AdminStatisticsController.java`
@@ -187,7 +187,7 @@ git commit -m "feat: add admin statistics read model"
 - Create: `backend/src/main/java/com/example/aiticket/admin/statistics/web/HotQuestionStatResponse.java`
 - Test: `backend/src/test/java/com/example/aiticket/admin/statistics/web/AdminStatisticsControllerTest.java`
 
-- [ ] **Step 1: Write controller tests**
+- [x] **Step 1: Write controller tests**
 
 Assert these methods have `@PreAuthorize("hasAuthority('dashboard:view')")`:
 
@@ -205,7 +205,7 @@ GET /api/admin/statistics/ticket-categories
 GET /api/admin/statistics/hot-questions
 ```
 
-- [ ] **Step 2: Run controller test to verify RED**
+- [x] **Step 2: Run controller test to verify RED**
 
 ```bash
 cd backend
@@ -214,7 +214,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/o
 
 Expected: fail because controller and response records do not exist.
 
-- [ ] **Step 3: Implement response records and controller**
+- [x] **Step 3: Implement response records and controller**
 
 Use `ApiResponse.ok(...)`. Keep `limit` optional with default handled by service:
 
@@ -232,14 +232,14 @@ public ApiResponse<List<TicketCategoryStatResponse>> ticketCategoryStats(@Reques
 public ApiResponse<List<HotQuestionStatResponse>> hotQuestions(@RequestParam(defaultValue = "10") int limit)
 ```
 
-- [ ] **Step 4: Run focused Task 2 tests**
+- [x] **Step 4: Run focused Task 2 tests**
 
 ```bash
 cd backend
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo -Dtest=AdminStatisticsControllerTest test
 ```
 
-- [ ] **Step 5: Commit Task 2**
+- [x] **Step 5: Commit Task 2**
 
 ```bash
 git add backend/src/main/java/com/example/aiticket/admin/statistics/web backend/src/test/java/com/example/aiticket/admin/statistics/web docs/superpowers/plans/2026-06-20-phase-6-admin-dashboard-implementation-plan.md
