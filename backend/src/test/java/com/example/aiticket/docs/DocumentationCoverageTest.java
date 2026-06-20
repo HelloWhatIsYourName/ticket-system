@@ -79,6 +79,23 @@ class DocumentationCoverageTest {
         assertThat(script).doesNotContain("echo \"$USER_TOKEN\"");
     }
 
+    @Test
+    void originalV1PlanReflectsCurrentImplementedScope() throws Exception {
+        Path projectPlanPath = Path.of("../docs/superpowers/specs/2026-06-19-ai-knowledge-ticket-v1-project-plan.md");
+        assertThat(projectPlanPath).exists();
+
+        String projectPlan = Files.readString(projectPlanPath);
+        assertThat(projectPlan).contains("Phase 19");
+        assertThat(projectPlan).contains("前端 RAG chat");
+        assertThat(projectPlan).contains("工单列表/详情");
+        assertThat(projectPlan).contains("知识库管理");
+        assertThat(projectPlan).contains("系统管理");
+        assertThat(projectPlan).contains("文件上传");
+        assertThat(projectPlan).contains("SSE");
+        assertThat(projectPlan).contains("live-provider rehearsal");
+        assertThat(projectPlan).doesNotContain("下一步推进剩余前端业务页");
+    }
+
     private void assertDocumentContainsMajorModules(Path path) throws Exception {
         assertThat(path).exists();
         String document = Files.readString(path);
