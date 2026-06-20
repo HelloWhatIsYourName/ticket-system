@@ -78,6 +78,35 @@ public class TicketController {
         )));
     }
 
+    @PostMapping("/{ticketId}/comments")
+    @PreAuthorize("hasAnyAuthority('ticket:view:own','ticket:process','ticket:manage')")
+    public ApiResponse<TicketCommentResponse> addComment(@PathVariable Long ticketId,
+                                                         @Valid @RequestBody CreateTicketCommentRequest request,
+                                                         @AuthenticationPrincipal AuthenticatedUser user) {
+        return ApiResponse.ok(TicketCommentResponse.from(service.addComment(
+                user.id(),
+                primaryRole(user),
+                ticketId,
+                user.permissions().contains("ticket:manage"),
+                user.permissions().contains("ticket:process"),
+                request.toCommand()
+        )));
+    }
+
+    @GetMapping("/{ticketId}/comments")
+    @PreAuthorize("hasAnyAuthority('ticket:view:own','ticket:process','ticket:manage')")
+    public ApiResponse<List<TicketCommentResponse>> comments(@PathVariable Long ticketId,
+                                                             @AuthenticationPrincipal AuthenticatedUser user) {
+        return ApiResponse.ok(service.listComments(
+                        user.id(),
+                        ticketId,
+                        user.permissions().contains("ticket:manage"),
+                        user.permissions().contains("ticket:process")
+                ).stream()
+                .map(TicketCommentResponse::from)
+                .toList());
+    }
+
     @PostMapping("/{ticketId}/assign")
     @PreAuthorize("hasAuthority('ticket:assign')")
     public ApiResponse<TicketResponse> assign(@PathVariable Long ticketId,

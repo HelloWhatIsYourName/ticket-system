@@ -33,5 +33,8 @@ class TicketMapperXmlTest {
         assertThat(mapper).contains("findTicketForUpdate");
         assertThat(mapper).contains("updateTicketStatus");
         assertThat(mapper).contains("listFlowLogs");
+        assertThat(mapper).contains("nextCommentId");
+        assertThat(mapper).contains("insertComment");
+        assertThat(mapper).contains("listComments");
     }
 }

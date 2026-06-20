@@ -3,6 +3,8 @@ package com.example.aiticket.ticket.service;
 import com.example.aiticket.ai.rag.domain.AiMessage;
 import com.example.aiticket.ai.rag.domain.AiSession;
 import com.example.aiticket.ticket.domain.Ticket;
+import com.example.aiticket.ticket.domain.TicketComment;
+import com.example.aiticket.ticket.domain.TicketCommentType;
 import com.example.aiticket.ticket.domain.TicketDetail;
 import com.example.aiticket.ticket.domain.TicketPriority;
 import com.example.aiticket.ticket.domain.TicketSource;
@@ -130,6 +132,25 @@ public class TicketWorkflowService {
     }
 
     @Transactional
+    public TicketComment addComment(Long userId, String operatorRole, Long ticketId, boolean canManage,
+                                    boolean canProcess, AddTicketCommentCommand command) {
+        Ticket ticket = getTicket(userId, ticketId, canManage, canProcess);
+        TicketCommentType type = normalizedCommentType(command);
+        String content = normalizedContent(command);
+        requireCommentPermission(ticket, userId, canManage, canProcess, type);
+
+        Long commentId = mapper.nextCommentId();
+        boolean internal = type == TicketCommentType.INTERNAL_NOTE || type == TicketCommentType.SYSTEM;
+        mapper.insertComment(commentId, ticket.id(), userId, type, content, internal);
+        return new TicketComment(commentId, ticket.id(), userId, type, content, internal, LocalDateTime.now());
+    }
+
+    public List<TicketComment> listComments(Long userId, Long ticketId, boolean canManage, boolean canProcess) {
+        Ticket ticket = getTicket(userId, ticketId, canManage, canProcess);
+        return mapper.listComments(ticket.id(), canSeeInternalComments(ticket, userId, canManage, canProcess));
+    }
+
+    @Transactional
     public Ticket startProcessing(Long operatorId, String operatorRole, Long ticketId, String comment) {
         Ticket current = lockedTicket(ticketId);
         requireAssignee(current, operatorId);
@@ -229,6 +250,41 @@ public class TicketWorkflowService {
         if (ticket.status() != expected) {
             throw new TicketWorkflowException("ticket status " + ticket.status() + " does not allow " + action);
         }
+    }
+
+    private TicketCommentType normalizedCommentType(AddTicketCommentCommand command) {
+        if (command == null || command.commentType() == null) {
+            throw new TicketWorkflowException("comment type is required");
+        }
+        if (command.commentType() == TicketCommentType.SYSTEM) {
+            throw new TicketWorkflowException("comment type SYSTEM is not allowed");
+        }
+        return command.commentType();
+    }
+
+    private String normalizedContent(AddTicketCommentCommand command) {
+        if (command == null || command.content() == null || command.content().isBlank()) {
+            throw new TicketWorkflowException("comment content is required");
+        }
+        return command.content().trim();
+    }
+
+    private void requireCommentPermission(Ticket ticket, Long userId, boolean canManage,
+                                          boolean canProcess, TicketCommentType type) {
+        boolean creator = ticket.creatorId().equals(userId);
+        boolean assignedProcessor = canProcess && userId.equals(ticket.assigneeId());
+        if (type == TicketCommentType.USER_REPLY && creator) {
+            return;
+        }
+        if ((type == TicketCommentType.AGENT_REPLY || type == TicketCommentType.INTERNAL_NOTE)
+                && (canManage || assignedProcessor)) {
+            return;
+        }
+        throw new TicketWorkflowException("comment type " + type + " is not allowed");
+    }
+
+    private boolean canSeeInternalComments(Ticket ticket, Long userId, boolean canManage, boolean canProcess) {
+        return canManage || (canProcess && userId.equals(ticket.assigneeId()));
     }
 
     private int normalizedLimit(int limit) {

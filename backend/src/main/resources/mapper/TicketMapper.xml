@@ -11,6 +11,10 @@
         SELECT ticket_flow_log_seq.NEXTVAL FROM dual
     </select>
 
+    <select id="nextCommentId" resultType="long">
+        SELECT ticket_comment_seq.NEXTVAL FROM dual
+    </select>
+
     <select id="findOwnedAiSession" resultType="com.example.aiticket.ai.rag.domain.AiSession">
         SELECT id, user_id, title, last_question, transfer_suggested, created_at, updated_at
         FROM ai_session
@@ -129,6 +133,29 @@
                operator_id, operator_role, comment_text, created_at
         FROM ticket_flow_log
         WHERE ticket_id = #{ticketId}
+        ORDER BY created_at ASC, id ASC
+    </select>
+
+    <insert id="insertComment">
+        INSERT INTO ticket_comment (
+            id, ticket_id, author_id, comment_type, content, internal
+        )
+        VALUES (
+            #{id}, #{ticketId}, #{authorId}, #{commentType}, #{content,jdbcType=CLOB},
+            <choose>
+                <when test="internal">1</when>
+                <otherwise>0</otherwise>
+            </choose>
+        )
+    </insert>
+
+    <select id="listComments" resultType="com.example.aiticket.ticket.domain.TicketComment">
+        SELECT id, ticket_id, author_id, comment_type, content, internal, created_at
+        FROM ticket_comment
+        WHERE ticket_id = #{ticketId}
+        <if test="!includeInternal">
+          AND internal = 0
+        </if>
         ORDER BY created_at ASC, id ASC
     </select>
 

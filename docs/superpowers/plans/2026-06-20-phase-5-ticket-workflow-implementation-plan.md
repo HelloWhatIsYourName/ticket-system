@@ -230,6 +230,65 @@ git add backend/src/main/java/com/example/aiticket/ticket backend/src/main/resou
 git commit -m "feat: expose ticket flow log detail"
 ```
 
+## Task 5: Ticket Replies and Internal Notes API ⭐
+
+**Files:**
+- Create: `backend/src/main/java/com/example/aiticket/ticket/domain/TicketComment.java`
+- Create: `backend/src/main/java/com/example/aiticket/ticket/domain/TicketCommentType.java`
+- Create: `backend/src/main/java/com/example/aiticket/ticket/service/AddTicketCommentCommand.java`
+- Modify: `backend/src/main/java/com/example/aiticket/ticket/service/TicketWorkflowService.java`
+- Modify: `backend/src/main/java/com/example/aiticket/ticket/mapper/TicketMapper.java`
+- Modify: `backend/src/main/resources/mapper/TicketMapper.xml`
+- Create: `backend/src/main/java/com/example/aiticket/ticket/web/CreateTicketCommentRequest.java`
+- Create: `backend/src/main/java/com/example/aiticket/ticket/web/TicketCommentResponse.java`
+- Modify: `backend/src/main/java/com/example/aiticket/ticket/web/TicketController.java`
+- Test: `backend/src/test/java/com/example/aiticket/ticket/mapper/TicketMapperXmlTest.java`
+- Test: `backend/src/test/java/com/example/aiticket/ticket/service/TicketWorkflowServiceTest.java`
+- Test: `backend/src/test/java/com/example/aiticket/ticket/web/TicketControllerTest.java`
+
+- [x] **Step 1: Write failing tests**
+
+Assert mapper XML declares `nextCommentId`, `insertComment`, and `listComments`. Assert service allows ticket creators to add `USER_REPLY`, assigned agents to add `AGENT_REPLY` and `INTERNAL_NOTE`, rejects ordinary users writing internal notes, and hides internal notes from creator-only views. Assert controller exposes:
+
+```text
+POST /api/tickets/{ticketId}/comments
+GET  /api/tickets/{ticketId}/comments
+```
+
+- [x] **Step 2: Run focused tests to verify RED**
+
+```bash
+cd backend
+JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo -Dtest=TicketMapperXmlTest,TicketWorkflowServiceTest,TicketControllerTest test
+```
+
+Verified RED: test compilation failed because `TicketComment`, `TicketCommentType`, `AddTicketCommentCommand`, comment DTOs, and mapper/service methods did not exist.
+
+- [x] **Step 3: Implement comment read/write model**
+
+Add comment domain records and enum. Derive the persisted `internal` flag server-side from `TicketCommentType` so clients cannot create inconsistent state. Reuse `TicketWorkflowService#getTicket(...)` for visibility and enforce comment-type permissions centrally.
+
+- [x] **Step 4: Implement REST endpoints**
+
+Add comment create/list endpoints under the existing ticket resource with `hasAnyAuthority('ticket:view:own','ticket:process','ticket:manage')`. Pass `ticket:manage` and `ticket:process` booleans into the service for fine-grained permission checks.
+
+- [x] **Step 5: Run focused and full tests**
+
+```bash
+cd backend
+JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo -Dtest=TicketMapperXmlTest,TicketWorkflowServiceTest,TicketControllerTest test
+JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo test
+```
+
+Verified GREEN: focused ticket tests passed with 18 tests, 0 failures; full backend suite passed with 72 tests, 0 failures.
+
+- [x] **Step 6: Commit Task 5**
+
+```bash
+git add backend/src/main/java/com/example/aiticket/ticket backend/src/main/resources/mapper/TicketMapper.xml backend/src/test/java/com/example/aiticket/ticket docs/superpowers/plans/2026-06-20-phase-5-ticket-workflow-implementation-plan.md
+git commit -m "feat: add ticket comments api"
+```
+
 ## Current Execution Note
 
-Task 1, Task 2, and Task 3 are complete. Task 4 adds the read-side flow-log detail needed by frontend ticket detail pages.
+Task 1 through Task 5 are complete. Task 5 adds user replies, agent replies, and internal notes for ticket detail pages.

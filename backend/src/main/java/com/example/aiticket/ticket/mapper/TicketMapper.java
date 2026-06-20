@@ -3,6 +3,8 @@ package com.example.aiticket.ticket.mapper;
 import com.example.aiticket.ai.rag.domain.AiMessage;
 import com.example.aiticket.ai.rag.domain.AiSession;
 import com.example.aiticket.ticket.domain.Ticket;
+import com.example.aiticket.ticket.domain.TicketComment;
+import com.example.aiticket.ticket.domain.TicketCommentType;
 import com.example.aiticket.ticket.domain.TicketFlowLog;
 import com.example.aiticket.ticket.domain.TicketPriority;
 import com.example.aiticket.ticket.domain.TicketSource;
@@ -19,6 +21,8 @@ public interface TicketMapper {
     Long nextTicketId();
 
     Long nextFlowLogId();
+
+    Long nextCommentId();
 
     AiSession findOwnedAiSession(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
 
@@ -71,6 +75,16 @@ public interface TicketMapper {
     List<Ticket> listManagedTickets(@Param("limit") int limit);
 
     List<TicketFlowLog> listFlowLogs(@Param("ticketId") Long ticketId);
+
+    int insertComment(@Param("id") Long id,
+                      @Param("ticketId") Long ticketId,
+                      @Param("authorId") Long authorId,
+                      @Param("commentType") TicketCommentType commentType,
+                      @Param("content") String content,
+                      @Param("internal") boolean internal);
+
+    List<TicketComment> listComments(@Param("ticketId") Long ticketId,
+                                     @Param("includeInternal") boolean includeInternal);
 
     int updateTicketStatus(@Param("ticketId") Long ticketId,
                            @Param("status") TicketStatus status,

@@ -1,9 +1,12 @@
 package com.example.aiticket.ticket.web;
 
 import com.example.aiticket.ticket.domain.Ticket;
+import com.example.aiticket.ticket.domain.TicketComment;
+import com.example.aiticket.ticket.domain.TicketCommentType;
 import com.example.aiticket.ticket.domain.TicketPriority;
 import com.example.aiticket.ticket.domain.TicketSource;
 import com.example.aiticket.ticket.domain.TicketStatus;
+import com.example.aiticket.ticket.service.AddTicketCommentCommand;
 import com.example.aiticket.ticket.service.CreateTicketFromAiSessionCommand;
 import com.example.aiticket.ticket.service.TicketWorkflowService;
 import com.example.aiticket.security.AuthenticatedUser;
@@ -31,6 +34,11 @@ class TicketControllerTest {
         assertThat(method("managedTickets").getAnnotation(PreAuthorize.class).value())
                 .isEqualTo("hasAuthority('ticket:manage')");
         assertThat(method("detail", Long.class, AuthenticatedUser.class).getAnnotation(PreAuthorize.class).value())
+                .isEqualTo("hasAnyAuthority('ticket:view:own','ticket:process','ticket:manage')");
+        assertThat(method("addComment", Long.class, CreateTicketCommentRequest.class, AuthenticatedUser.class)
+                .getAnnotation(PreAuthorize.class).value())
+                .isEqualTo("hasAnyAuthority('ticket:view:own','ticket:process','ticket:manage')");
+        assertThat(method("comments", Long.class, AuthenticatedUser.class).getAnnotation(PreAuthorize.class).value())
                 .isEqualTo("hasAnyAuthority('ticket:view:own','ticket:process','ticket:manage')");
         assertThat(method("assign", Long.class, AssignTicketRequest.class, AuthenticatedUser.class)
                 .getAnnotation(PreAuthorize.class).value())
@@ -83,6 +91,26 @@ class TicketControllerTest {
     }
 
     @Test
+    void commentEndpointsMapRequestAndResponse() {
+        FakeTicketWorkflowService service = new FakeTicketWorkflowService();
+        TicketController controller = new TicketController(service);
+
+        TicketCommentResponse created = controller.addComment(100L, new CreateTicketCommentRequest(
+                TicketCommentType.INTERNAL_NOTE, "身份信息已核验"
+        ), agent()).data();
+        List<TicketCommentResponse> comments = controller.comments(100L, agent()).data();
+
+        assertThat(service.lastCommentCommand.commentType()).isEqualTo(TicketCommentType.INTERNAL_NOTE);
+        assertThat(service.lastCommentCommand.content()).isEqualTo("身份信息已核验");
+        assertThat(created.id()).isEqualTo(300L);
+        assertThat(created.internal()).isTrue();
+        assertThat(comments).hasSize(1);
+        assertThat(Arrays.stream(TicketCommentResponse.class.getRecordComponents()).map(RecordComponent::getName))
+                .contains("commentType", "content", "internal")
+                .doesNotContain("deleted");
+    }
+
+    @Test
     void actionEndpointsReturnUpdatedTicket() {
         TicketController controller = new TicketController(new FakeTicketWorkflowService());
         TicketActionRequest action = new TicketActionRequest("处理意见");
@@ -117,6 +145,7 @@ class TicketControllerTest {
 
     private static final class FakeTicketWorkflowService extends TicketWorkflowService {
         private CreateTicketFromAiSessionCommand lastCreateCommand;
+        private AddTicketCommentCommand lastCommentCommand;
 
         private FakeTicketWorkflowService() {
             super(null);
@@ -161,6 +190,18 @@ class TicketControllerTest {
         }
 
         @Override
+        public TicketComment addComment(Long userId, String operatorRole, Long ticketId, boolean canManage,
+                                        boolean canProcess, AddTicketCommentCommand command) {
+            this.lastCommentCommand = command;
+            return comment(command.commentType());
+        }
+
+        @Override
+        public List<TicketComment> listComments(Long userId, Long ticketId, boolean canManage, boolean canProcess) {
+            return List.of(comment(TicketCommentType.INTERNAL_NOTE));
+        }
+
+        @Override
         public Ticket assign(Long operatorId, String operatorRole, Long ticketId, Long assigneeId, String comment) {
             return ticket(TicketStatus.PENDING_PROCESS, assigneeId);
         }
@@ -195,6 +236,11 @@ class TicketControllerTest {
                     TicketPriority.NORMAL, null, 1L, null, 7L, assigneeId, TicketSource.AI_SESSION,
                     10L, 21L, "忘记密码需要人工", "AI 建议转人工", "AI 建议转人工",
                     null, null, null, 0, false, LocalDateTime.now(), LocalDateTime.now());
+        }
+
+        private TicketComment comment(TicketCommentType type) {
+            return new TicketComment(300L, 100L, 3L, type, "身份信息已核验",
+                    type == TicketCommentType.INTERNAL_NOTE, LocalDateTime.now());
         }
     }
 }

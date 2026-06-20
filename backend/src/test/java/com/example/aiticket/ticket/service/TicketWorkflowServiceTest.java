@@ -4,6 +4,8 @@ import com.example.aiticket.ai.rag.domain.AiMessage;
 import com.example.aiticket.ai.rag.domain.AiMessageRole;
 import com.example.aiticket.ai.rag.domain.AiSession;
 import com.example.aiticket.ticket.domain.Ticket;
+import com.example.aiticket.ticket.domain.TicketComment;
+import com.example.aiticket.ticket.domain.TicketCommentType;
 import com.example.aiticket.ticket.domain.TicketFlowLog;
 import com.example.aiticket.ticket.domain.TicketPriority;
 import com.example.aiticket.ticket.domain.TicketSource;
@@ -159,9 +161,61 @@ class TicketWorkflowServiceTest {
         assertThat(service.getTicketDetail(2L, 100L, true, false).flowLogs()).hasSize(1);
     }
 
+    @Test
+    void creatorCanAddUserReplyAndOnlySeesExternalComments() {
+        FakeTicketMapper mapper = new FakeTicketMapper();
+        mapper.comments.add(new TestComment(301L, 100L, 3L, TicketCommentType.INTERNAL_NOTE, "内部排查备注", true));
+        TicketWorkflowService service = new TicketWorkflowService(mapper);
+
+        TicketComment comment = service.addComment(7L, "USER", 100L, false, false,
+                new AddTicketCommentCommand(TicketCommentType.USER_REPLY, "我补充一下手机号后四位。"));
+
+        assertThat(comment.id()).isEqualTo(300L);
+        assertThat(comment.commentType()).isEqualTo(TicketCommentType.USER_REPLY);
+        assertThat(comment.internal()).isFalse();
+        assertThat(mapper.comments).hasSize(2);
+        assertThat(service.listComments(7L, 100L, false, false))
+                .extracting(TicketComment::commentType)
+                .containsExactly(TicketCommentType.USER_REPLY);
+    }
+
+    @Test
+    void assignedAgentCanAddReplyAndInternalNoteAndSeesInternalComments() {
+        FakeTicketMapper mapper = new FakeTicketMapper();
+        mapper.ticketForUpdate = mapper.ticketForUpdate(TicketStatus.PROCESSING, 3L);
+        TicketWorkflowService service = new TicketWorkflowService(mapper);
+
+        TicketComment reply = service.addComment(3L, "AGENT", 100L, false, true,
+                new AddTicketCommentCommand(TicketCommentType.AGENT_REPLY, "已经帮你提交人工核验。"));
+        TicketComment note = service.addComment(3L, "AGENT", 100L, false, true,
+                new AddTicketCommentCommand(TicketCommentType.INTERNAL_NOTE, "用户身份信息已核验。"));
+
+        assertThat(reply.internal()).isFalse();
+        assertThat(note.internal()).isTrue();
+        assertThat(service.listComments(3L, 100L, false, true))
+                .extracting(TicketComment::commentType)
+                .containsExactly(TicketCommentType.AGENT_REPLY, TicketCommentType.INTERNAL_NOTE);
+    }
+
+    @Test
+    void ordinaryCreatorCannotAddInternalNoteOrAgentReply() {
+        FakeTicketMapper mapper = new FakeTicketMapper();
+        TicketWorkflowService service = new TicketWorkflowService(mapper);
+
+        assertThatThrownBy(() -> service.addComment(7L, "USER", 100L, false, false,
+                new AddTicketCommentCommand(TicketCommentType.INTERNAL_NOTE, "普通用户不能写内部备注")))
+                .isInstanceOf(TicketWorkflowException.class)
+                .hasMessage("comment type INTERNAL_NOTE is not allowed");
+        assertThatThrownBy(() -> service.addComment(7L, "USER", 100L, false, false,
+                new AddTicketCommentCommand(TicketCommentType.AGENT_REPLY, "普通用户不能冒充坐席回复")))
+                .isInstanceOf(TicketWorkflowException.class)
+                .hasMessage("comment type AGENT_REPLY is not allowed");
+    }
+
     private static final class FakeTicketMapper implements TicketMapper {
         private long nextTicketId = 100L;
         private long nextFlowLogId = 200L;
+        private long nextCommentId = 300L;
         private AiSession ownedSession = new AiSession(10L, 7L, "忘记密码", "忘记密码怎么处理？",
                 true, LocalDateTime.now(), LocalDateTime.now());
         private AiMessage assistantMessage = new AiMessage(21L, 10L, 7L, AiMessageRole.ASSISTANT,
@@ -170,6 +224,7 @@ class TicketWorkflowServiceTest {
         private Ticket ticketForUpdate = ticketForUpdate(TicketStatus.PENDING_ASSIGN, null);
         private final List<Ticket> insertedTickets = new ArrayList<>();
         private final List<TestFlowLog> flowLogs = new ArrayList<>();
+        private final List<TestComment> comments = new ArrayList<>();
         private TicketStatus updatedStatus;
         private Long updatedAssigneeId;
         private LocalDateTime updatedFirstResolvedAt;
@@ -184,6 +239,11 @@ class TicketWorkflowServiceTest {
         @Override
         public Long nextFlowLogId() {
             return nextFlowLogId++;
+        }
+
+        @Override
+        public Long nextCommentId() {
+            return nextCommentId++;
         }
 
         @Override
@@ -287,6 +347,23 @@ class TicketWorkflowServiceTest {
         }
 
         @Override
+        public int insertComment(Long id, Long ticketId, Long authorId, TicketCommentType commentType,
+                                 String content, boolean internal) {
+            comments.add(new TestComment(id, ticketId, authorId, commentType, content, internal));
+            return 1;
+        }
+
+        @Override
+        public List<TicketComment> listComments(Long ticketId, boolean includeInternal) {
+            return comments.stream()
+                    .filter(comment -> comment.ticketId().equals(ticketId))
+                    .filter(comment -> includeInternal || !comment.internal())
+                    .map(comment -> new TicketComment(comment.id(), comment.ticketId(), comment.authorId(),
+                            comment.commentType(), comment.content(), comment.internal(), LocalDateTime.now()))
+                    .toList();
+        }
+
+        @Override
         public int updateTicketStatus(Long ticketId, TicketStatus status, Long assigneeId,
                                       LocalDateTime firstResolvedAt, LocalDateTime closedAt,
                                       Integer incrementReopen) {
@@ -310,6 +387,10 @@ class TicketWorkflowServiceTest {
     private record TestFlowLog(Long id, Long ticketId, TicketStatus fromStatus, TicketStatus toStatus,
                                TicketWorkflowAction action, Long operatorId, String operatorRole,
                                String commentText) {
+    }
+
+    private record TestComment(Long id, Long ticketId, Long authorId, TicketCommentType commentType,
+                               String content, boolean internal) {
     }
 
 }
