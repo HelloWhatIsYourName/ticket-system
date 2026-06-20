@@ -342,7 +342,7 @@ git add docs/acceptance docs/demo backend/src/test/java/com/example/aiticket/doc
 git commit -m "docs: add acceptance and demo runbooks"
 ```
 
-## Task 4: Phase 7 Verification Report and Project Progress
+## Task 4: Phase 7 Verification Report and Project Progress ⭐
 
 **Files:**
 - Create: `docs/spikes/phase-7-quality-and-thesis-materials.md`
@@ -350,21 +350,21 @@ git commit -m "docs: add acceptance and demo runbooks"
 - Modify: `沟通材料/2026-06-19-ai-knowledge-ticket-v1-project-plan.md`
 - Modify: `docs/superpowers/plans/2026-06-20-phase-7-quality-and-thesis-materials-implementation-plan.md`
 
-- [ ] **Step 1: Run focused docs tests**
+- [x] **Step 1: Run focused docs tests**
 
 ```bash
 cd backend
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo -Dtest=DocumentationCoverageTest,RagEvaluationSetTest test
 ```
 
-- [ ] **Step 2: Run all backend tests**
+- [x] **Step 2: Run all backend tests**
 
 ```bash
 cd backend
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH mvn -Dmaven.repo.local=/Users/xianghuaifeng/Documents/毕业设计/.worktrees/knowledge-live-verification/.m2repo test
 ```
 
-- [ ] **Step 3: Optionally run live smoke**
+- [x] **Step 3: Optionally run live smoke**
 
 If Oracle, Redis, backend, and model/mock providers are available:
 
@@ -374,7 +374,7 @@ BASE_URL=http://127.0.0.1:8080 tools/smoke/phase7-backend-smoke.sh
 
 Record sanitized output. If providers are not available, document why it was skipped and rely on the latest Phase 6 smoke plus automated test evidence.
 
-- [ ] **Step 4: Create Phase 7 spike report**
+- [x] **Step 4: Create Phase 7 spike report**
 
 Write `docs/spikes/phase-7-quality-and-thesis-materials.md` with:
 
@@ -386,11 +386,11 @@ acceptance/demo document summary
 remaining frontend and thesis writing scope
 ```
 
-- [ ] **Step 5: Update project plan progress**
+- [x] **Step 5: Update project plan progress**
 
 In both project plan copies, update section `12.0 当前实现进度` so Phase 7 testing/materials are marked completed for backend evidence, with thesis prose and frontend UI still noted as follow-up integration work.
 
-- [ ] **Step 6: Final diff and commit**
+- [x] **Step 6: Final diff and commit**
 
 ```bash
 git diff --check
