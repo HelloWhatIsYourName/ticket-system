@@ -42,4 +42,14 @@ class TicketMapperXmlTest {
         assertThat(mapper).contains("updateTicketCategoryEnabled");
         assertThat(mapper).contains("listTicketCategories");
     }
+
+    @Test
+    void ticketMapperDeclaresAssignmentRecommendationWorkloadQuery() throws Exception {
+        String mapper = Files.readString(Path.of("src/main/resources/mapper/TicketMapper.xml"));
+
+        assertThat(mapper).contains("listAgentWorkloads");
+        assertThat(mapper).contains("r.role_code = 'AGENT'");
+        assertThat(mapper).contains("t.status IN ('PENDING_PROCESS', 'PROCESSING', 'RESOLVED')");
+        assertThat(mapper).contains("ORDER BY active_ticket_count ASC, u.id ASC");
+    }
 }

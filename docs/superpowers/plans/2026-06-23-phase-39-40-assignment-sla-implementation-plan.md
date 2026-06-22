@@ -495,7 +495,7 @@ git commit -m "feat: expose ticket sla status"
 - Modify: `backend/src/main/resources/mapper/TicketMapper.xml`
 - Modify: `backend/src/test/java/com/example/aiticket/ticket/mapper/TicketMapperXmlTest.java`
 
-- [ ] **Step 1: Write failing recommendation service tests**
+- [x] ⭐ **Step 1: Write failing recommendation service tests**
 
 Create `TicketAssignmentRecommendationServiceTest.java` with a fake mapper implementing only methods used by the service:
 
@@ -629,7 +629,7 @@ class TicketAssignmentRecommendationServiceTest {
 }
 ```
 
-- [ ] **Step 2: Run test and verify RED**
+- [x] ⭐ **Step 2: Run test and verify RED**
 
 ```bash
 cd backend
@@ -640,7 +640,7 @@ mvn -Dtest=TicketAssignmentRecommendationServiceTest test
 
 Expected: FAIL because recommendation classes and mapper method do not exist.
 
-- [ ] **Step 3: Implement recommendation records and service**
+- [x] ⭐ **Step 3: Implement recommendation records and service**
 
 Create `AgentWorkload.java`:
 
@@ -730,7 +730,7 @@ public class TicketAssignmentRecommendationService {
 }
 ```
 
-- [ ] **Step 4: Add mapper method and XML query**
+- [x] ⭐ **Step 4: Add mapper method and XML query**
 
 In `TicketMapper.java`, add:
 
@@ -762,7 +762,7 @@ In `TicketMapper.xml`, add:
 </select>
 ```
 
-- [ ] **Step 5: Add mapper XML test coverage**
+- [x] ⭐ **Step 5: Add mapper XML test coverage**
 
 In `TicketMapperXmlTest`, add assertions:
 
@@ -773,7 +773,7 @@ assertThat(mapper).contains("t.status IN ('PENDING_PROCESS', 'PROCESSING', 'RESO
 assertThat(mapper).contains("ORDER BY active_ticket_count ASC, u.id ASC");
 ```
 
-- [ ] **Step 6: Run tests and verify GREEN**
+- [x] ⭐ **Step 6: Run tests and verify GREEN**
 
 ```bash
 cd backend
@@ -784,7 +784,7 @@ mvn -Dtest=TicketAssignmentRecommendationServiceTest,TicketMapperXmlTest test
 
 Expected: PASS.
 
-- [ ] **Step 7: Update plan checkbox**
+- [x] ⭐ **Step 7: Update plan checkbox**
 
 Mark Task 3 `[x] ⭐`.
 

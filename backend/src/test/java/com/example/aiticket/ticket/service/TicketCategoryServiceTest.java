@@ -179,6 +179,11 @@ class TicketCategoryServiceTest {
         }
 
         @Override
+        public List<AgentWorkload> listAgentWorkloads() {
+            return List.of();
+        }
+
+        @Override
         public List<Ticket> listCreatedTickets(Long creatorId, int limit) {
             return List.of();
         }

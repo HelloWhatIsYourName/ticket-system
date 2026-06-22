@@ -11,6 +11,7 @@ import com.example.aiticket.ticket.domain.TicketPriority;
 import com.example.aiticket.ticket.domain.TicketSource;
 import com.example.aiticket.ticket.domain.TicketStatus;
 import com.example.aiticket.ticket.domain.TicketWorkflowAction;
+import com.example.aiticket.ticket.service.AgentWorkload;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -70,6 +71,8 @@ public interface TicketMapper {
     Ticket findAssignedTicket(@Param("ticketId") Long ticketId, @Param("assigneeId") Long assigneeId);
 
     Ticket findTicketById(@Param("ticketId") Long ticketId);
+
+    List<AgentWorkload> listAgentWorkloads();
 
     List<Ticket> listCreatedTickets(@Param("creatorId") Long creatorId, @Param("limit") int limit);
 
