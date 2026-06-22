@@ -470,7 +470,7 @@ Expected: PASS.
 
 Mark Task 2 `[x] ⭐`.
 
-- [ ] **Step 8: Commit**
+- [x] ⭐ **Step 8: Commit**
 
 ```bash
 git add backend/src/main/java/com/example/aiticket/ticket/service/TicketWorkflowService.java \
@@ -811,7 +811,7 @@ git commit -m "feat: recommend ticket assignee"
 - Modify: `backend/src/main/java/com/example/aiticket/ticket/web/TicketController.java`
 - Modify: `backend/src/test/java/com/example/aiticket/ticket/web/TicketControllerTest.java`
 
-- [ ] **Step 1: Write failing controller tests**
+- [x] ⭐ **Step 1: Write failing controller tests**
 
 In `TicketControllerTest`, add:
 
@@ -853,7 +853,7 @@ private static final class FakeRecommendationService extends TicketAssignmentRec
 }
 ```
 
-- [ ] **Step 2: Run test and verify RED**
+- [x] ⭐ **Step 2: Run test and verify RED**
 
 ```bash
 cd backend
@@ -864,7 +864,7 @@ mvn -Dtest=TicketControllerTest test
 
 Expected: FAIL because constructor and endpoint do not exist.
 
-- [ ] **Step 3: Implement response record**
+- [x] ⭐ **Step 3: Implement response record**
 
 Create `AssignmentRecommendationResponse.java`:
 
@@ -892,7 +892,7 @@ public record AssignmentRecommendationResponse(
 }
 ```
 
-- [ ] **Step 4: Implement controller endpoint**
+- [x] ⭐ **Step 4: Implement controller endpoint**
 
 Modify `TicketController`:
 
@@ -915,7 +915,7 @@ public ApiResponse<AssignmentRecommendationResponse> assignmentRecommendation(@P
 }
 ```
 
-- [ ] **Step 5: Update tests using controller constructor**
+- [x] ⭐ **Step 5: Update tests using controller constructor**
 
 Replace existing `new TicketController(new FakeTicketWorkflowService())` calls with:
 
@@ -923,13 +923,13 @@ Replace existing `new TicketController(new FakeTicketWorkflowService())` calls w
 new TicketController(new FakeTicketWorkflowService(), new FakeRecommendationService())
 ```
 
-- [ ] **Step 6: Run test and verify GREEN**
+- [x] ⭐ **Step 6: Run test and verify GREEN**
 
 Run the command from Step 2.
 
 Expected: PASS.
 
-- [ ] **Step 7: Update plan checkbox**
+- [x] ⭐ **Step 7: Update plan checkbox**
 
 Mark Task 4 `[x] ⭐`.
 

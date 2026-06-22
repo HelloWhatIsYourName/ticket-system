@@ -7,7 +7,9 @@ import com.example.aiticket.ticket.domain.TicketPriority;
 import com.example.aiticket.ticket.domain.TicketSource;
 import com.example.aiticket.ticket.domain.TicketStatus;
 import com.example.aiticket.ticket.service.AddTicketCommentCommand;
+import com.example.aiticket.ticket.service.AssignmentRecommendation;
 import com.example.aiticket.ticket.service.CreateTicketFromAiSessionCommand;
+import com.example.aiticket.ticket.service.TicketAssignmentRecommendationService;
 import com.example.aiticket.ticket.service.TicketWorkflowService;
 import com.example.aiticket.security.AuthenticatedUser;
 import org.junit.jupiter.api.Test;
@@ -61,9 +63,29 @@ class TicketControllerTest {
     }
 
     @Test
+    void recommendationEndpointRequiresTicketAssignPermission() throws NoSuchMethodException {
+        assertThat(method("assignmentRecommendation", Long.class).getAnnotation(PreAuthorize.class).value())
+                .isEqualTo("hasAuthority('ticket:assign')");
+    }
+
+    @Test
+    void recommendationEndpointReturnsRecommendationResponse() {
+        FakeRecommendationService recommendationService = new FakeRecommendationService();
+        TicketController controller = new TicketController(new FakeTicketWorkflowService(), recommendationService);
+
+        AssignmentRecommendationResponse response = controller.assignmentRecommendation(100L).data();
+
+        assertThat(response.recommendedAssigneeId()).isEqualTo(3L);
+        assertThat(response.recommendedUsername()).isEqualTo("agent");
+        assertThat(response.recommendedDisplayName()).isEqualTo("演示坐席");
+        assertThat(response.activeTicketCount()).isEqualTo(2L);
+        assertThat(response.reason()).contains("演示坐席");
+    }
+
+    @Test
     void createMapsRequestToServiceAndResponse() {
         FakeTicketWorkflowService service = new FakeTicketWorkflowService();
-        TicketController controller = new TicketController(service);
+        TicketController controller = new TicketController(service, new FakeRecommendationService());
 
         TicketResponse response = controller.createFromAiSession(new CreateTicketFromAiSessionRequest(
                 10L, 21L, "忘记密码需要人工", "验证码无法接收", 1L,
@@ -81,7 +103,7 @@ class TicketControllerTest {
 
     @Test
     void listsAndDetailMapTickets() {
-        TicketController controller = new TicketController(new FakeTicketWorkflowService());
+        TicketController controller = new TicketController(new FakeTicketWorkflowService(), new FakeRecommendationService());
 
         assertThat(controller.myTickets(user()).data()).hasSize(1);
         assertThat(controller.assignedTickets(agent()).data()).hasSize(1);
@@ -93,7 +115,7 @@ class TicketControllerTest {
     @Test
     void commentEndpointsMapRequestAndResponse() {
         FakeTicketWorkflowService service = new FakeTicketWorkflowService();
-        TicketController controller = new TicketController(service);
+        TicketController controller = new TicketController(service, new FakeRecommendationService());
 
         TicketCommentResponse created = controller.addComment(100L, new CreateTicketCommentRequest(
                 TicketCommentType.INTERNAL_NOTE, "身份信息已核验"
@@ -112,7 +134,7 @@ class TicketControllerTest {
 
     @Test
     void actionEndpointsReturnUpdatedTicket() {
-        TicketController controller = new TicketController(new FakeTicketWorkflowService());
+        TicketController controller = new TicketController(new FakeTicketWorkflowService(), new FakeRecommendationService());
         TicketActionRequest action = new TicketActionRequest("处理意见");
 
         assertThat(controller.assign(100L, new AssignTicketRequest(3L, "分配"), admin()).data().status())
@@ -241,6 +263,18 @@ class TicketControllerTest {
         private TicketComment comment(TicketCommentType type) {
             return new TicketComment(300L, 100L, 3L, type, "身份信息已核验",
                     type == TicketCommentType.INTERNAL_NOTE, LocalDateTime.now());
+        }
+    }
+
+    private static final class FakeRecommendationService extends TicketAssignmentRecommendationService {
+        private FakeRecommendationService() {
+            super(null);
+        }
+
+        @Override
+        public AssignmentRecommendation recommend(Long ticketId) {
+            return new AssignmentRecommendation(3L, "agent", "演示坐席", 2L,
+                    "推荐演示坐席：当前在办 2 单，是当前负载最低坐席");
         }
     }
 }

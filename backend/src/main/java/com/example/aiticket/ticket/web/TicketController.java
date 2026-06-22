@@ -4,6 +4,7 @@ import com.example.aiticket.common.api.ApiResponse;
 import com.example.aiticket.security.AuthenticatedUser;
 import com.example.aiticket.ticket.domain.Ticket;
 import com.example.aiticket.ticket.service.CreateTicketFromAiSessionCommand;
+import com.example.aiticket.ticket.service.TicketAssignmentRecommendationService;
 import com.example.aiticket.ticket.service.TicketWorkflowService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,9 +22,11 @@ import java.util.List;
 @RequestMapping("/api/tickets")
 public class TicketController {
     private final TicketWorkflowService service;
+    private final TicketAssignmentRecommendationService recommendationService;
 
-    public TicketController(TicketWorkflowService service) {
+    public TicketController(TicketWorkflowService service, TicketAssignmentRecommendationService recommendationService) {
         this.service = service;
+        this.recommendationService = recommendationService;
     }
 
     @PostMapping("/from-ai-session")
@@ -114,6 +117,12 @@ public class TicketController {
                                               @AuthenticationPrincipal AuthenticatedUser user) {
         return ApiResponse.ok(TicketResponse.from(service.assign(
                 user.id(), primaryRole(user), ticketId, request.assigneeId(), request.comment())));
+    }
+
+    @GetMapping("/{ticketId}/assignment-recommendation")
+    @PreAuthorize("hasAuthority('ticket:assign')")
+    public ApiResponse<AssignmentRecommendationResponse> assignmentRecommendation(@PathVariable Long ticketId) {
+        return ApiResponse.ok(AssignmentRecommendationResponse.from(recommendationService.recommend(ticketId)));
     }
 
     @PostMapping("/{ticketId}/start")
