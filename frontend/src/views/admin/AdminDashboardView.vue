@@ -66,6 +66,18 @@ onMounted(async () => {
           <strong>{{ overview.pendingTickets }}</strong>
         </article>
         <article class="dashboard-stat">
+          <span>处理中</span>
+          <strong>{{ overview.processingTickets }}</strong>
+        </article>
+        <article class="dashboard-stat">
+          <span>已解决</span>
+          <strong>{{ overview.resolvedTickets }}</strong>
+        </article>
+        <article class="dashboard-stat">
+          <span>已关闭</span>
+          <strong>{{ overview.closedTickets }}</strong>
+        </article>
+        <article class="dashboard-stat">
           <span>平均处理时长</span>
           <strong>{{ overview.averageResolveHours.toFixed(1) }}h</strong>
         </article>

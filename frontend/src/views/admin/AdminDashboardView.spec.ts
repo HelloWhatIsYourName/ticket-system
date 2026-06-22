@@ -34,6 +34,11 @@ describe('AdminDashboardView', () => {
 
     expect(wrapper.text()).toContain('工单总量')
     expect(wrapper.text()).toContain('待处理')
+    expect(wrapper.text()).toContain('处理中')
+    expect(wrapper.text()).toContain('已解决')
+    expect(wrapper.text()).toContain('已关闭')
+    expect(wrapper.text()).toContain('2')
+    expect(wrapper.text()).toContain('5')
     expect(wrapper.text()).toContain('平均处理时长')
     expect(wrapper.text()).toContain('知识库命中率')
     expect(wrapper.text()).toContain('热门问题')
