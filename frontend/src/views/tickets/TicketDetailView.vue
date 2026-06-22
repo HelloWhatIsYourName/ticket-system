@@ -5,7 +5,9 @@ import EmptyState from '../../components/common/EmptyState.vue'
 import ErrorState from '../../components/common/ErrorState.vue'
 import LoadingState from '../../components/common/LoadingState.vue'
 import { useAuthStore } from '../../stores/auth'
+import { listSystemRoles, listSystemUsers, type SystemUser } from '../../api/systemAdmin'
 import {
+  assignTicket,
   closeTicket,
   confirmCloseTicket,
   createTicketComment,
@@ -34,8 +36,36 @@ const commentType = ref<TicketCommentType>('USER_REPLY')
 const commentContent = ref('')
 const submittingComment = ref(false)
 const runningAction = ref('')
+const assignees = ref<SystemUser[]>([])
+const selectedAssigneeId = ref('')
+const loadingAssignees = ref(false)
 const canWriteAgentComment = computed(
   () => auth.permissions.includes('ticket:process') || auth.permissions.includes('ticket:manage')
+)
+const currentUserId = computed(() => auth.user?.id)
+const isAssignedProcessor = computed(
+  () => auth.permissions.includes('ticket:process') && ticket.value?.assigneeId === currentUserId.value
+)
+const isCreator = computed(
+  () => auth.permissions.includes('ticket:view:own') && ticket.value?.creatorId === currentUserId.value
+)
+const canManageTicket = computed(() => auth.permissions.includes('ticket:manage'))
+const canStartTicket = computed(() => isAssignedProcessor.value && ticket.value?.status === 'PENDING_PROCESS')
+const canResolveTicket = computed(() => isAssignedProcessor.value && ticket.value?.status === 'PROCESSING')
+const canReopenTicket = computed(() => isCreator.value && ticket.value?.status === 'RESOLVED')
+const canConfirmCloseTicket = computed(() => isCreator.value && ticket.value?.status === 'RESOLVED')
+const canCloseTicket = computed(() => canManageTicket.value && ticket.value?.status !== 'CLOSED')
+const canAssignTicket = computed(
+  () => auth.permissions.includes('ticket:assign') && canManageTicket.value && ticket.value?.status === 'PENDING_ASSIGN'
+)
+const hasWorkflowAction = computed(
+  () =>
+    canAssignTicket.value ||
+    canStartTicket.value ||
+    canResolveTicket.value ||
+    canReopenTicket.value ||
+    canConfirmCloseTicket.value ||
+    canCloseTicket.value
 )
 const commentTypeOptions = computed(() =>
   canWriteAgentComment.value
@@ -97,6 +127,10 @@ function formatCommentType(type: TicketCommentType) {
   return '回复'
 }
 
+function formatFlowLogComment(log: TicketDetail['flowLogs'][number]) {
+  return log.commentText || log.remark || '无备注'
+}
+
 watchEffect(() => {
   if (!commentTypeOptions.value.some((option) => option.value === commentType.value)) {
     commentType.value = commentTypeOptions.value[0].value
@@ -119,6 +153,25 @@ async function loadTicket() {
     error.value = err instanceof Error ? err.message : '工单详情加载失败'
   } finally {
     loading.value = false
+  }
+}
+
+async function loadAssignees() {
+  if (!canManageTicket.value || !auth.permissions.includes('system:user:manage')) {
+    return
+  }
+
+  loadingAssignees.value = true
+
+  try {
+    const [userResult, roleResult] = await Promise.all([listSystemUsers(100), listSystemRoles()])
+    const agentRoleIds = roleResult.filter((role) => role.roleCode === 'AGENT').map((role) => role.id)
+
+    assignees.value = userResult.filter(
+      (user) => user.status === 'ACTIVE' && user.roleIds.some((roleId) => agentRoleIds.includes(roleId))
+    )
+  } finally {
+    loadingAssignees.value = false
   }
 }
 
@@ -160,13 +213,43 @@ async function runAction(
     if (ticket.value) {
       ticket.value = { ...ticket.value, ...updated }
     }
+    await loadTicket()
     actionComment.value = ''
   } finally {
     runningAction.value = ''
   }
 }
 
-onMounted(loadTicket)
+async function assignSelectedTicket() {
+  const assigneeId = Number(selectedAssigneeId.value)
+
+  if (!assigneeId || runningAction.value) {
+    return
+  }
+
+  runningAction.value = 'assign'
+
+  try {
+    const updated = await assignTicket(ticketId.value, {
+      assigneeId,
+      comment: actionComment.value.trim() || undefined
+    })
+
+    if (ticket.value) {
+      ticket.value = { ...ticket.value, ...updated }
+    }
+    await loadTicket()
+    selectedAssigneeId.value = ''
+    actionComment.value = ''
+  } finally {
+    runningAction.value = ''
+  }
+}
+
+onMounted(async () => {
+  await loadTicket()
+  await loadAssignees()
+})
 </script>
 
 <template>
@@ -263,8 +346,29 @@ onMounted(loadTicket)
               placeholder="给本次状态变更留一条备注"
             />
           </label>
-          <div class="ticket-action-grid">
+          <div v-if="canAssignTicket" class="ticket-assignment-form">
+            <strong>分配工单</strong>
+            <label>
+              坐席
+              <select v-model="selectedAssigneeId" data-testid="assignee-select" :disabled="loadingAssignees">
+                <option value="">请选择坐席</option>
+                <option v-for="assignee in assignees" :key="assignee.id" :value="String(assignee.id)">
+                  {{ assignee.displayName }}（{{ assignee.username }}）
+                </option>
+              </select>
+            </label>
             <button
+              data-testid="assign-ticket"
+              type="button"
+              :disabled="Boolean(runningAction) || !selectedAssigneeId"
+              @click="assignSelectedTicket"
+            >
+              {{ runningAction === 'assign' ? '分配中...' : '分配给坐席' }}
+            </button>
+          </div>
+          <div v-if="hasWorkflowAction" class="ticket-action-grid">
+            <button
+              v-if="canStartTicket"
               data-testid="start-ticket"
               type="button"
               :disabled="Boolean(runningAction)"
@@ -272,23 +376,44 @@ onMounted(loadTicket)
             >
               开始处理
             </button>
-            <button type="button" :disabled="Boolean(runningAction)" @click="runAction('resolve', resolveTicket)">
+            <button
+              v-if="canResolveTicket"
+              data-testid="resolve-ticket"
+              type="button"
+              :disabled="Boolean(runningAction)"
+              @click="runAction('resolve', resolveTicket)"
+            >
               标记解决
             </button>
-            <button type="button" :disabled="Boolean(runningAction)" @click="runAction('reopen', reopenTicket)">
+            <button
+              v-if="canReopenTicket"
+              data-testid="reopen-ticket"
+              type="button"
+              :disabled="Boolean(runningAction)"
+              @click="runAction('reopen', reopenTicket)"
+            >
               重新打开
             </button>
             <button
+              v-if="canConfirmCloseTicket"
+              data-testid="confirm-close-ticket"
               type="button"
               :disabled="Boolean(runningAction)"
               @click="runAction('confirm-close', confirmCloseTicket)"
             >
               确认关闭
             </button>
-            <button type="button" :disabled="Boolean(runningAction)" @click="runAction('close', closeTicket)">
+            <button
+              v-if="canCloseTicket"
+              data-testid="close-ticket"
+              type="button"
+              :disabled="Boolean(runningAction)"
+              @click="runAction('close', closeTicket)"
+            >
               管理关闭
             </button>
           </div>
+          <EmptyState v-else message="当前状态暂无可执行动作" />
         </section>
 
         <section class="ticket-detail-panel">
@@ -299,7 +424,7 @@ onMounted(loadTicket)
           <EmptyState v-if="ticket.flowLogs.length === 0" message="暂无流程记录" />
           <article v-for="log in ticket.flowLogs" v-else :key="log.id" class="flow-log-item">
             <strong>{{ log.action }}</strong>
-            <span>{{ log.remark || '无备注' }}</span>
+            <span>{{ formatFlowLogComment(log) }}</span>
             <time>{{ formatDate(log.createdAt) }}</time>
           </article>
         </section>

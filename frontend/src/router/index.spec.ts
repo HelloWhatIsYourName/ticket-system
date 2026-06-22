@@ -12,12 +12,12 @@ describe('routes', () => {
     expect(appRoute?.meta?.requiresAuth).toBe(true)
   })
 
-  it('exposes assigned tickets inside the app shell', () => {
+  it('exposes ticket list routes before ticket detail inside the app shell', () => {
     const appRoute = routes.find((route) => route.path === '/app')
+    const paths = appRoute?.children?.map((route) => route.path) ?? []
 
-    expect(appRoute?.children?.map((route) => route.path)).toEqual(
-      expect.arrayContaining(['tickets/assigned'])
-    )
+    expect(paths).toEqual(expect.arrayContaining(['tickets/my', 'tickets/assigned', 'tickets/manage']))
+    expect(paths.indexOf('tickets/manage')).toBeLessThan(paths.indexOf('tickets/:ticketId'))
   })
 
   it('redirects anonymous app navigation to login with redirect query', async () => {
@@ -56,5 +56,26 @@ describe('routes', () => {
       )
     ).resolves.toBe(true)
     expect(loadCurrentUser).toHaveBeenCalledOnce()
+  })
+
+  it('redirects authenticated users away from routes they do not have permission to access', async () => {
+    await expect(
+      resolveAuthNavigation(
+        {
+          fullPath: '/app/admin/dashboard',
+          matched: [
+            { meta: { requiresAuth: true } },
+            { meta: { requiredPermissions: ['dashboard:view'] } }
+          ]
+        },
+        {
+          isAuthenticated: true,
+          user: { id: 4, username: 'user' },
+          permissions: ['ai:chat:ask', 'ticket:view:own'],
+          firstMenuPath: '/app/ai/chat',
+          loadCurrentUser: vi.fn()
+        }
+      )
+    ).resolves.toEqual('/app/ai/chat')
   })
 })

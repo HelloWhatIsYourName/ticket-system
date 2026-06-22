@@ -45,6 +45,7 @@ export interface TicketFlowLog {
   toStatus?: TicketStatus | null
   action: string
   operatorId: number
+  commentText?: string | null
   remark?: string | null
   createdAt?: string
 }
@@ -108,6 +109,12 @@ export async function listMyTickets(): Promise<TicketSummary[]> {
 
 export async function listAssignedTickets(): Promise<TicketSummary[]> {
   const response = await http.get<ApiResponse<TicketSummary[]>>('/tickets/assigned')
+
+  return unwrapData(response.data)
+}
+
+export async function listManagedTickets(): Promise<TicketSummary[]> {
+  const response = await http.get<ApiResponse<TicketSummary[]>>('/tickets/manage')
 
   return unwrapData(response.data)
 }

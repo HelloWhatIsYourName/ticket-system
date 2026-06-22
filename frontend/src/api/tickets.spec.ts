@@ -5,6 +5,7 @@ import {
   createTicketFromAiSession,
   getTicket,
   listAssignedTickets,
+  listManagedTickets,
   listMyTickets,
   listTicketComments,
   listTicketCategories,
@@ -71,7 +72,7 @@ describe('tickets api', () => {
     )
   })
 
-  it('loads my and assigned tickets', async () => {
+  it('loads my, assigned, and managed tickets', async () => {
     getMock
       .mockResolvedValueOnce({
         data: {
@@ -87,11 +88,20 @@ describe('tickets api', () => {
           message: 'ok'
         }
       })
+      .mockResolvedValueOnce({
+        data: {
+          success: true,
+          data: [{ id: 3, ticketNo: 'TK-3', title: '全部工单' }],
+          message: 'ok'
+        }
+      })
 
     await expect(listMyTickets()).resolves.toHaveLength(1)
     await expect(listAssignedTickets()).resolves.toHaveLength(1)
+    await expect(listManagedTickets()).resolves.toHaveLength(1)
     expect(getMock).toHaveBeenNthCalledWith(1, '/tickets/my')
     expect(getMock).toHaveBeenNthCalledWith(2, '/tickets/assigned')
+    expect(getMock).toHaveBeenNthCalledWith(3, '/tickets/manage')
   })
 
   it('loads ticket detail and comments', async () => {

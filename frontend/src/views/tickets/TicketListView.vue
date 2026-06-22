@@ -6,6 +6,7 @@ import ErrorState from '../../components/common/ErrorState.vue'
 import LoadingState from '../../components/common/LoadingState.vue'
 import {
   listAssignedTickets,
+  listManagedTickets,
   listMyTickets,
   type TicketPriority,
   type TicketStatus,
@@ -17,12 +18,35 @@ const tickets = ref<TicketSummary[]>([])
 const loading = ref(true)
 const error = ref('')
 const isAssignedMode = computed(() => route.name === 'assigned-tickets')
-const pageTitle = computed(() => (isAssignedMode.value ? '分配给我的工单' : '我的工单'))
+const isManagedMode = computed(() => route.name === 'managed-tickets')
+const pageTitle = computed(() => {
+  if (isManagedMode.value) {
+    return '工单管理'
+  }
+
+  return isAssignedMode.value ? '分配给我的工单' : '我的工单'
+})
 const pageDescription = computed(() =>
-  isAssignedMode.value ? '坐席需要处理的问题会在这里继续推进' : '从 AI 会话转入的问题会在这里继续跟踪'
+  isManagedMode.value
+    ? '管理员可以查看待分配和处理中工单，并进入详情完成分派'
+    : isAssignedMode.value
+      ? '坐席需要处理的问题会在这里继续推进'
+      : '从 AI 会话转入的问题会在这里继续跟踪'
 )
-const emptyMessage = computed(() => (isAssignedMode.value ? '暂无分配给你的工单' : '暂无工单'))
-const tableLabel = computed(() => (isAssignedMode.value ? '分配给我的工单列表' : '我的工单列表'))
+const emptyMessage = computed(() => {
+  if (isManagedMode.value) {
+    return '暂无可管理工单'
+  }
+
+  return isAssignedMode.value ? '暂无分配给你的工单' : '暂无工单'
+})
+const tableLabel = computed(() => {
+  if (isManagedMode.value) {
+    return '工单管理列表'
+  }
+
+  return isAssignedMode.value ? '分配给我的工单列表' : '我的工单列表'
+})
 
 const statusLabel: Record<TicketStatus, string> = {
   PENDING_ASSIGN: '待分配',
@@ -63,7 +87,13 @@ async function loadTickets() {
   loading.value = true
   error.value = ''
   try {
-    tickets.value = isAssignedMode.value ? await listAssignedTickets() : await listMyTickets()
+    if (isManagedMode.value) {
+      tickets.value = await listManagedTickets()
+    } else if (isAssignedMode.value) {
+      tickets.value = await listAssignedTickets()
+    } else {
+      tickets.value = await listMyTickets()
+    }
   } catch (err) {
     tickets.value = []
     error.value = err instanceof Error ? err.message : '工单加载失败'
