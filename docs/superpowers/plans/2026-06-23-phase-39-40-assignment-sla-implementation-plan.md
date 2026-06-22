@@ -953,7 +953,7 @@ git commit -m "feat: expose assignment recommendation api"
 - Modify: `frontend/src/views/tickets/TicketListView.vue`
 - Modify: `frontend/src/views/tickets/TicketListView.spec.ts`
 
-- [ ] **Step 1: Write failing API test**
+- [x] ⭐ **Step 1: Write failing API test**
 
 In `tickets.spec.ts`, import `getAssignmentRecommendation` and add:
 
@@ -981,7 +981,7 @@ it('loads assignment recommendation for a ticket', async () => {
 })
 ```
 
-- [ ] **Step 2: Write failing ticket list SLA test**
+- [x] ⭐ **Step 2: Write failing ticket list SLA test**
 
 In `TicketListView.spec.ts`, add SLA fields to at least one ticket:
 
@@ -999,7 +999,7 @@ expect(wrapper.text()).toContain('即将超时')
 expect(wrapper.text()).toContain('2026-06-20 18:00')
 ```
 
-- [ ] **Step 3: Run frontend focused tests and verify RED**
+- [x] ⭐ **Step 3: Run frontend focused tests and verify RED**
 
 ```bash
 cd frontend
@@ -1008,7 +1008,7 @@ npm run test -- src/api/tickets.spec.ts src/views/tickets/TicketListView.spec.ts
 
 Expected: FAIL because API function and SLA UI are missing.
 
-- [ ] **Step 4: Implement frontend API types**
+- [x] ⭐ **Step 4: Implement frontend API types**
 
 In `tickets.ts`, add:
 
@@ -1044,7 +1044,7 @@ export async function getAssignmentRecommendation(ticketId: number): Promise<Ass
 }
 ```
 
-- [ ] **Step 5: Implement ticket list SLA UI**
+- [x] ⭐ **Step 5: Implement ticket list SLA UI**
 
 In `TicketListView.vue`, import `type SlaStatus`.
 
@@ -1076,17 +1076,17 @@ Add `SLA` column to the header and row:
 </span>
 ```
 
-- [ ] **Step 6: Run focused tests and verify GREEN**
+- [x] ⭐ **Step 6: Run focused tests and verify GREEN**
 
 Run command from Step 3.
 
 Expected: PASS.
 
-- [ ] **Step 7: Update plan checkbox**
+- [x] ⭐ **Step 7: Update plan checkbox**
 
 Mark Task 5 `[x] ⭐`.
 
-- [ ] **Step 8: Commit**
+- [x] ⭐ **Step 8: Commit**
 
 ```bash
 git add frontend/src/api/tickets.ts frontend/src/api/tickets.spec.ts \

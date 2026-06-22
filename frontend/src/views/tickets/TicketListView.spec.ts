@@ -39,6 +39,9 @@ describe('TicketListView', () => {
         priority: 'HIGH',
         source: 'AI_SESSION',
         transferReason: 'AI 置信度低，需要人工处理',
+        deadlineAt: '2026-06-20T18:00:00',
+        slaStatus: 'DUE_SOON',
+        slaRemainingMinutes: 90,
         createdAt: '2026-06-20T10:00:00'
       }
     ])
@@ -60,6 +63,9 @@ describe('TicketListView', () => {
     expect(wrapper.text()).toContain('无法登录后台')
     expect(wrapper.text()).toContain('待分配')
     expect(wrapper.text()).toContain('高')
+    expect(wrapper.text()).toContain('SLA')
+    expect(wrapper.text()).toContain('即将超时')
+    expect(wrapper.text()).toContain('2026-06-20 18:00')
     expect(wrapper.text()).toContain('AI 置信度低，需要人工处理')
     expect(wrapper.find('a[href="/app/tickets/1"]').exists()).toBe(true)
     expect(listAssignedTicketsMock).not.toHaveBeenCalled()

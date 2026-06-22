@@ -1495,7 +1495,7 @@ select {
 
 .ticket-row {
   display: grid;
-  grid-template-columns: 170px minmax(220px, 1fr) 110px 90px 110px 140px;
+  grid-template-columns: 170px minmax(220px, 1fr) 110px 90px 130px 110px 140px;
   gap: 14px;
   align-items: center;
   padding: 16px 18px;
@@ -1546,6 +1546,26 @@ select {
   background: #dff0ee;
   font-size: 12px;
   font-weight: 760;
+}
+
+.ticket-chip.sla-ON_TRACK {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.ticket-chip.sla-DUE_SOON {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.ticket-chip.sla-OVERDUE {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.ticket-chip.sla-COMPLETED {
+  color: #1e40af;
+  background: #dbeafe;
 }
 
 .ticket-detail-layout {
@@ -2105,7 +2125,7 @@ select {
   }
 
   .ticket-row {
-    min-width: 860px;
+    min-width: 1000px;
   }
 
   .demo-guide-layout {

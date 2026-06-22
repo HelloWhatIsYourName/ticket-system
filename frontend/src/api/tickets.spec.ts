@@ -3,6 +3,7 @@ import { http } from './http'
 import {
   createTicketComment,
   createTicketFromAiSession,
+  getAssignmentRecommendation,
   getTicket,
   listAssignedTickets,
   listManagedTickets,
@@ -125,6 +126,28 @@ describe('tickets api', () => {
     await expect(listTicketComments(8)).resolves.toHaveLength(1)
     expect(getMock).toHaveBeenNthCalledWith(1, '/tickets/8')
     expect(getMock).toHaveBeenNthCalledWith(2, '/tickets/8/comments')
+  })
+
+  it('loads assignment recommendation for a ticket', async () => {
+    getMock.mockResolvedValueOnce({
+      data: {
+        success: true,
+        data: {
+          recommendedAssigneeId: 3,
+          recommendedUsername: 'agent',
+          recommendedDisplayName: '演示坐席',
+          activeTicketCount: 2,
+          reason: '推荐演示坐席：当前在办 2 单，是当前负载最低坐席'
+        },
+        message: 'ok'
+      }
+    })
+
+    await expect(getAssignmentRecommendation(8)).resolves.toMatchObject({
+      recommendedAssigneeId: 3,
+      recommendedUsername: 'agent'
+    })
+    expect(getMock).toHaveBeenCalledWith('/tickets/8/assignment-recommendation')
   })
 
   it('creates comments and moves ticket workflow status', async () => {

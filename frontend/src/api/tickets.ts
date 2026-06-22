@@ -4,6 +4,7 @@ export type TicketPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'
 export type TicketStatus = 'PENDING_ASSIGN' | 'PENDING_PROCESS' | 'PROCESSING' | 'RESOLVED' | 'CLOSED'
 export type TicketSource = 'MANUAL' | 'AI_SESSION'
 export type TicketCommentType = 'USER_REPLY' | 'AGENT_REPLY' | 'INTERNAL_NOTE' | 'SYSTEM'
+export type SlaStatus = 'COMPLETED' | 'OVERDUE' | 'DUE_SOON' | 'ON_TRACK'
 
 export interface TicketCategory {
   id: number
@@ -31,6 +32,9 @@ export interface TicketSummary {
   aiSummary?: string | null
   aiSuggestion?: string | null
   transferReason?: string | null
+  deadlineAt?: string | null
+  slaStatus?: SlaStatus | null
+  slaRemainingMinutes?: number | null
   reopenCount?: number
   firstResolvedAt?: string | null
   closedAt?: string | null
@@ -87,6 +91,14 @@ export interface AssignTicketRequest extends TicketActionRequest {
   assigneeId: number
 }
 
+export interface AssignmentRecommendation {
+  recommendedAssigneeId?: number | null
+  recommendedUsername?: string | null
+  recommendedDisplayName?: string | null
+  activeTicketCount?: number | null
+  reason: string
+}
+
 export async function listTicketCategories(includeDisabled = false): Promise<TicketCategory[]> {
   const response = await http.get<ApiResponse<TicketCategory[]>>('/ticket-categories', {
     params: { includeDisabled }
@@ -121,6 +133,14 @@ export async function listManagedTickets(): Promise<TicketSummary[]> {
 
 export async function getTicket(ticketId: number): Promise<TicketDetail> {
   const response = await http.get<ApiResponse<TicketDetail>>(`/tickets/${ticketId}`)
+
+  return unwrapData(response.data)
+}
+
+export async function getAssignmentRecommendation(ticketId: number): Promise<AssignmentRecommendation> {
+  const response = await http.get<ApiResponse<AssignmentRecommendation>>(
+    `/tickets/${ticketId}/assignment-recommendation`
+  )
 
   return unwrapData(response.data)
 }

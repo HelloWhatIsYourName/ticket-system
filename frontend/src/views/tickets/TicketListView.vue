@@ -8,6 +8,7 @@ import {
   listAssignedTickets,
   listManagedTickets,
   listMyTickets,
+  type SlaStatus,
   type TicketPriority,
   type TicketStatus,
   type TicketSummary
@@ -63,12 +64,23 @@ const priorityLabel: Record<TicketPriority, string> = {
   URGENT: '紧急'
 }
 
+const slaLabel: Record<SlaStatus, string> = {
+  ON_TRACK: '正常',
+  DUE_SOON: '即将超时',
+  OVERDUE: '已超时',
+  COMPLETED: '已完成'
+}
+
 function formatStatus(status: TicketStatus) {
   return statusLabel[status] ?? status
 }
 
 function formatPriority(priority?: TicketPriority | null) {
   return priority ? priorityLabel[priority] : '未定'
+}
+
+function formatSla(status?: SlaStatus | null) {
+  return status ? slaLabel[status] : '未设置'
 }
 
 function formatSource(source?: string) {
@@ -125,6 +137,7 @@ watch(() => route.name, loadTickets, { immediate: true })
         <span>标题</span>
         <span>状态</span>
         <span>优先级</span>
+        <span>SLA</span>
         <span>来源</span>
         <span>创建时间</span>
       </div>
@@ -138,6 +151,12 @@ watch(() => route.name, loadTickets, { immediate: true })
           <mark class="ticket-chip">{{ formatStatus(ticket.status) }}</mark>
         </span>
         <span>{{ formatPriority(ticket.priority) }}</span>
+        <span>
+          <mark class="ticket-chip" :class="`sla-${ticket.slaStatus || 'unknown'}`">
+            {{ formatSla(ticket.slaStatus) }}
+          </mark>
+          <small v-if="ticket.deadlineAt">{{ formatDate(ticket.deadlineAt) }}</small>
+        </span>
         <span>{{ formatSource(ticket.source) }}</span>
         <span>{{ formatDate(ticket.createdAt) }}</span>
       </article>
