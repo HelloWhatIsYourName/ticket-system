@@ -77,7 +77,7 @@
 - Test: `backend/src/test/java/com/example/aiticket/ticket/service/SlaPolicyTest.java`
 - Test: `backend/src/test/java/com/example/aiticket/ticket/service/SlaCalculatorTest.java`
 
-- [ ] **Step 1: Write failing SLA policy tests**
+- [x] ⭐ **Step 1: Write failing SLA policy tests**
 
 Create `SlaPolicyTest.java`:
 
@@ -110,7 +110,7 @@ class SlaPolicyTest {
 }
 ```
 
-- [ ] **Step 2: Write failing SLA calculator tests**
+- [x] ⭐ **Step 2: Write failing SLA calculator tests**
 
 Create `SlaCalculatorTest.java`:
 
@@ -179,7 +179,7 @@ class SlaCalculatorTest {
 }
 ```
 
-- [ ] **Step 3: Run tests and verify RED**
+- [x] ⭐ **Step 3: Run tests and verify RED**
 
 Run:
 
@@ -192,7 +192,7 @@ mvn -Dtest=SlaPolicyTest,SlaCalculatorTest test
 
 Expected: FAIL because `SlaPolicy`, `SlaCalculator`, `SlaSnapshot`, and `SlaStatus` do not exist.
 
-- [ ] **Step 4: Implement SLA domain classes**
+- [x] ⭐ **Step 4: Implement SLA domain classes**
 
 Create `SlaStatus.java`:
 
@@ -293,17 +293,17 @@ public class SlaCalculator {
 }
 ```
 
-- [ ] **Step 5: Run tests and verify GREEN**
+- [x] ⭐ **Step 5: Run tests and verify GREEN**
 
 Run the same Maven command from Step 3.
 
 Expected: PASS.
 
-- [ ] **Step 6: Update plan checkbox**
+- [x] ⭐ **Step 6: Update plan checkbox**
 
 In this file, change Task 1 checkbox from `[ ]` to `[x] ⭐` after tests pass.
 
-- [ ] **Step 7: Commit**
+- [x] ⭐ **Step 7: Commit**
 
 ```bash
 git add backend/src/main/java/com/example/aiticket/ticket/domain/SlaStatus.java \
