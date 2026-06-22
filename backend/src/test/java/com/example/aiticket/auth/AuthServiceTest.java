@@ -53,7 +53,7 @@ class AuthServiceTest {
         );
 
         assertThatThrownBy(() -> service.login(new LoginRequest("missing", "bad"), "127.0.0.1", "JUnit"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(InvalidLoginException.class)
                 .hasMessage("用户名或密码错误");
         assertThat(mapper.auditAction).isEqualTo("AUTH_LOGIN_FAILURE");
         assertThat(mapper.auditResult).isEqualTo("FAILURE");

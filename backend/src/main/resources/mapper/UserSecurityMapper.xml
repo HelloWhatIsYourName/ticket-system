@@ -84,8 +84,10 @@
             result, message, ip_address, user_agent
         )
         VALUES (
-            #{actorUserId}, #{actorUsername}, #{action}, #{targetType}, #{targetId},
-            #{result}, #{message}, #{ipAddress}, #{userAgent}
+            #{actorUserId,jdbcType=NUMERIC}, #{actorUsername,jdbcType=VARCHAR},
+            #{action,jdbcType=VARCHAR}, #{targetType,jdbcType=VARCHAR}, #{targetId,jdbcType=VARCHAR},
+            #{result,jdbcType=VARCHAR}, #{message,jdbcType=VARCHAR},
+            #{ipAddress,jdbcType=VARCHAR}, #{userAgent,jdbcType=VARCHAR}
         )
     </insert>
 </mapper>

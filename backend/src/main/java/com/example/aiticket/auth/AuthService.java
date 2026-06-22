@@ -33,7 +33,7 @@ public class AuthService {
                 .orElseThrow(() -> {
                     auditLogService.record(null, request.username(), "AUTH_LOGIN_FAILURE", "AUTH", null,
                             "FAILURE", "login failure", ipAddress, userAgent);
-                    return new IllegalArgumentException(LOGIN_FAILURE_MESSAGE);
+                    return new InvalidLoginException(LOGIN_FAILURE_MESSAGE);
                 });
 
         UserAccount user = snapshot.user();

@@ -4,6 +4,7 @@ import com.example.aiticket.common.api.ApiResponse;
 import com.example.aiticket.security.AuthenticatedUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,5 +31,11 @@ public class AuthController {
     @GetMapping("/ping")
     public ApiResponse<String> ping() {
         return ApiResponse.ok("pong");
+    }
+
+    @ExceptionHandler(InvalidLoginException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiResponse<Void> invalidLogin(InvalidLoginException ex) {
+        return ApiResponse.fail(ex.getMessage());
     }
 }
