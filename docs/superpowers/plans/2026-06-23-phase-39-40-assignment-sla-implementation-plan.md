@@ -327,7 +327,7 @@ git commit -m "feat: add ticket sla policy"
 - Modify: `backend/src/main/java/com/example/aiticket/ticket/web/TicketDetailResponse.java`
 - Create: `backend/src/test/java/com/example/aiticket/ticket/web/TicketResponseTest.java`
 
-- [ ] **Step 1: Write failing workflow deadline test**
+- [x] ⭐ **Step 1: Write failing workflow deadline test**
 
 In `TicketWorkflowServiceTest#createFromAiSessionInsertsTicketAndCreateFlowLog`, add:
 
@@ -353,7 +353,7 @@ void createFromAiSessionPersistsDeadlineFromPriority() {
 }
 ```
 
-- [ ] **Step 2: Write failing DTO SLA test**
+- [x] ⭐ **Step 2: Write failing DTO SLA test**
 
 Create `TicketResponseTest.java`:
 
@@ -389,7 +389,7 @@ class TicketResponseTest {
 }
 ```
 
-- [ ] **Step 3: Run tests and verify RED**
+- [x] ⭐ **Step 3: Run tests and verify RED**
 
 ```bash
 cd backend
@@ -400,7 +400,7 @@ mvn -Dtest=TicketWorkflowServiceTest,TicketResponseTest test
 
 Expected: FAIL because `TicketResponse` lacks SLA accessors and workflow creation still passes null deadline.
 
-- [ ] **Step 4: Implement workflow deadline calculation**
+- [x] ⭐ **Step 4: Implement workflow deadline calculation**
 
 Modify `TicketWorkflowService`:
 
@@ -432,7 +432,7 @@ deadlineAt,
 null, null, 0, false, now, now
 ```
 
-- [ ] **Step 5: Implement response SLA fields**
+- [x] ⭐ **Step 5: Implement response SLA fields**
 
 Modify `TicketResponse` record fields to include:
 
@@ -460,13 +460,13 @@ sla.slaRemainingMinutes(),
 
 Modify `TicketDetailResponse` to include the same fields and populate them from `TicketResponse`.
 
-- [ ] **Step 6: Run tests and verify GREEN**
+- [x] ⭐ **Step 6: Run tests and verify GREEN**
 
 Run the command from Step 3.
 
 Expected: PASS.
 
-- [ ] **Step 7: Update plan checkbox**
+- [x] ⭐ **Step 7: Update plan checkbox**
 
 Mark Task 2 `[x] ⭐`.
 

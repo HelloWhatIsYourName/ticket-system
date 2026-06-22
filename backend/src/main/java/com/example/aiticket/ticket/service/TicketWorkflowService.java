@@ -11,6 +11,7 @@ import com.example.aiticket.ticket.domain.TicketSource;
 import com.example.aiticket.ticket.domain.TicketStatus;
 import com.example.aiticket.ticket.domain.TicketWorkflowAction;
 import com.example.aiticket.ticket.mapper.TicketMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +25,17 @@ public class TicketWorkflowService {
 
     private final TicketMapper mapper;
     private final AssignmentStrategy assignmentStrategy;
+    private final SlaPolicy slaPolicy;
 
     public TicketWorkflowService(TicketMapper mapper, AssignmentStrategy assignmentStrategy) {
+        this(mapper, assignmentStrategy, new SlaPolicy());
+    }
+
+    @Autowired
+    public TicketWorkflowService(TicketMapper mapper, AssignmentStrategy assignmentStrategy, SlaPolicy slaPolicy) {
         this.mapper = mapper;
         this.assignmentStrategy = assignmentStrategy;
+        this.slaPolicy = slaPolicy;
     }
 
     @Transactional
@@ -46,6 +54,8 @@ public class TicketWorkflowService {
         String title = normalized(command.title(), session.title());
         String description = normalized(command.description(), session.lastQuestion());
         TicketPriority priority = command.priority() == null ? TicketPriority.NORMAL : command.priority();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime deadlineAt = slaPolicy.deadlineFor(priority, now);
         String transferReason = normalized(command.transferReason(),
                 assistantMessage == null ? "用户请求人工处理" : assistantMessage.transferReason());
         String aiSuggestion = assistantMessage == null ? null : assistantMessage.content();
@@ -68,7 +78,7 @@ public class TicketWorkflowService {
                 title,
                 aiSuggestion,
                 transferReason,
-                null
+                deadlineAt
         );
         insertFlow(ticketId, null, TicketStatus.PENDING_ASSIGN, TicketWorkflowAction.CREATE,
                 userId, operatorRole, transferReason);
@@ -76,7 +86,7 @@ public class TicketWorkflowService {
         return new Ticket(ticketId, ticketNo, title, description, TicketStatus.PENDING_ASSIGN, priority,
                 null, command.categoryId(), null, userId, null, TicketSource.AI_SESSION,
                 session.id(), assistantMessage == null ? null : assistantMessage.id(), title, aiSuggestion,
-                transferReason, null, null, null, 0, false, LocalDateTime.now(), LocalDateTime.now());
+                transferReason, deadlineAt, null, null, 0, false, now, now);
     }
 
     @Transactional

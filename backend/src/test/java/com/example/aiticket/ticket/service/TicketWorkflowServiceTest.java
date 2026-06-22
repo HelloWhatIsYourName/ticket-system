@@ -44,10 +44,25 @@ class TicketWorkflowServiceTest {
         assertThat(ticket.source()).isEqualTo(TicketSource.AI_SESSION);
         assertThat(ticket.sourceSessionId()).isEqualTo(10L);
         assertThat(ticket.sourceMessageId()).isEqualTo(21L);
+        assertThat(ticket.deadlineAt()).isNotNull();
         assertThat(mapper.insertedTickets).hasSize(1);
+        assertThat(mapper.insertedTickets.getFirst().deadlineAt()).isNotNull();
         assertThat(mapper.flowLogs).hasSize(1);
         assertThat(mapper.flowLogs.getFirst().action()).isEqualTo(TicketWorkflowAction.CREATE);
         assertThat(mapper.flowLogs.getFirst().toStatus()).isEqualTo(TicketStatus.PENDING_ASSIGN);
+    }
+
+    @Test
+    void createFromAiSessionPersistsDeadlineFromPriority() {
+        FakeTicketMapper mapper = new FakeTicketMapper();
+        TicketWorkflowService service = new TicketWorkflowService(mapper, new ManualAssignmentStrategy());
+
+        Ticket urgent = service.createFromAiSession(7L, "USER", new CreateTicketFromAiSessionCommand(
+                10L, null, "紧急问题", "系统完全不可用。", 1L, TicketPriority.URGENT, "紧急处理"
+        ));
+
+        assertThat(urgent.deadlineAt()).isNotNull();
+        assertThat(mapper.insertedTickets.getFirst().deadlineAt()).isEqualTo(urgent.deadlineAt());
     }
 
     @Test

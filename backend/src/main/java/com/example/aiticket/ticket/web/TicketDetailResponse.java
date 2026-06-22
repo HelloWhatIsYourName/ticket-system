@@ -1,6 +1,7 @@
 package com.example.aiticket.ticket.web;
 
 import com.example.aiticket.ticket.domain.TicketDetail;
+import com.example.aiticket.ticket.domain.SlaStatus;
 import com.example.aiticket.ticket.domain.TicketPriority;
 import com.example.aiticket.ticket.domain.TicketSource;
 import com.example.aiticket.ticket.domain.TicketStatus;
@@ -24,6 +25,9 @@ public record TicketDetailResponse(
         String aiSummary,
         String aiSuggestion,
         String transferReason,
+        LocalDateTime deadlineAt,
+        SlaStatus slaStatus,
+        Long slaRemainingMinutes,
         Integer reopenCount,
         LocalDateTime firstResolvedAt,
         LocalDateTime closedAt,
@@ -49,6 +53,9 @@ public record TicketDetailResponse(
                 ticket.aiSummary(),
                 ticket.aiSuggestion(),
                 ticket.transferReason(),
+                ticket.deadlineAt(),
+                ticket.slaStatus(),
+                ticket.slaRemainingMinutes(),
                 ticket.reopenCount(),
                 ticket.firstResolvedAt(),
                 ticket.closedAt(),
