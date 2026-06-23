@@ -1,172 +1,42 @@
 # AI Knowledge Ticket System
 
-![Java 21](https://img.shields.io/badge/Java-21-007396)
-![Spring Boot 3.3](https://img.shields.io/badge/Spring%20Boot-3.3-6DB33F)
-![Vue 3](https://img.shields.io/badge/Vue-3-42B883)
-![Oracle 23ai](https://img.shields.io/badge/Oracle-23ai-F80000)
-![License](https://img.shields.io/badge/License-TBD-lightgrey)
+An AI-powered knowledge-base question answering and ticket collaboration system for enterprise support scenarios.
 
-An end-to-end AI knowledge-base question answering and ticket collaboration system built with Spring Boot, Oracle 23ai Vector Search, Redis, Vue 3, and an OpenAI-compatible LLM provider.
+## 1. API Configuration
 
-The project demonstrates a complete support workflow: administrators maintain a knowledge base, users ask AI questions with citations, unresolved questions can be converted into tickets, admins assign tickets with an explainable recommendation, agents process the tickets, users confirm closure, and dashboards track the result.
+The backend reads provider and infrastructure settings from environment variables. Do not commit API keys, JWTs, `.env` files, or local secret files.
 
-> Final defense / demo path: [docs/demo/final-defense-runbook.md](docs/demo/final-defense-runbook.md)
+### AI Chat Provider
 
-## Table of Contents
+The default chat provider is DeepSeek.
 
-- [Highlights](#highlights)
-- [Feature Matrix](#feature-matrix)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Repository Layout](#repository-layout)
-- [Quick Start](#quick-start)
-- [Demo Accounts](#demo-accounts)
-- [Verification](#verification)
-- [Documentation Index](#documentation-index)
-- [Security Notes](#security-notes)
-- [Roadmap](#roadmap)
-- [License](#license)
-
-## Highlights
-
-- **RAG over Oracle 23ai vectors**: stores knowledge chunks in `VECTOR(1024, FLOAT32)` and retrieves grounded context for user questions.
-- **AI chat with citations**: renders source snippets and supports SSE streaming with an HTTP fallback.
-- **AI-to-ticket handoff**: converts an AI session into a traceable ticket when the user still needs manual support.
-- **Role-based workflow**: admin, user, and agent roles see different menus and actions through Spring Security + JWT + RBAC.
-- **Manual control with smart recommendation**: admin keeps final assignment control while the system recommends the lowest-load active agent.
-- **Priority-based SLA visibility**: ticket creation derives `deadlineAt`; list/detail pages show `ON_TRACK`, `DUE_SOON`, `OVERDUE`, and `COMPLETED`.
-- **Defense-ready evidence**: smoke scripts, frontend tests, backend tests, build checks, and acceptance evidence are documented.
-
-## Feature Matrix
-
-| Area | Capability | Current Status |
+| Variable | Default | Description |
 | --- | --- | --- |
-| Authentication | JWT login, `/api/auth/me`, route guard, role menus | Implemented |
-| RBAC | user, role, permission, menu model | Implemented |
-| Knowledge Base | text ingestion, `.txt/.md` upload, parsing state, retrieval test | Implemented |
-| Vector Search | Oracle 23ai vector column and similarity retrieval | Implemented |
-| RAG Chat | OpenAI-compatible chat, SiliconFlow embeddings, citations, SSE stream | Implemented |
-| Ticket Workflow | create, assign, start, resolve, reopen, confirm close, manage close | Implemented |
-| Comments | public replies, agent replies, internal notes | Implemented |
-| Assignment Recommendation | read-only lowest-workload AGENT recommendation | Implemented |
-| SLA | priority-based deadline and derived SLA status | Implemented |
-| Admin Dashboard | totals, pending/processing/resolved/closed counts, knowledge and AI metrics | Implemented |
-| System Admin | user list, role list, permission visibility, status controls | Implemented |
-| Acceptance Evidence | repeatable smoke collector with redacted logs | Implemented |
+| `AI_CHAT_BASE_URL` | `https://api.deepseek.com` | OpenAI-compatible chat API base URL |
+| `AI_CHAT_API_KEY` | empty | Chat provider API key |
+| `AI_CHAT_MODEL` | `deepseek-chat` | Chat model name |
 
-## Architecture
+### Embedding Provider
 
-```mermaid
-flowchart LR
-    User["User / Agent / Admin"] --> Frontend["Vue 3 + Vite Frontend"]
-    Frontend --> API["Spring Boot REST API"]
-    API --> Auth["Spring Security + JWT + RBAC"]
-    API --> Ticket["Ticket Workflow Service"]
-    API --> RAG["RAG Chat Service"]
-    API --> Knowledge["Knowledge Ingestion / Retrieval"]
-    API --> Stats["Admin Statistics"]
-    Knowledge --> Oracle["Oracle 23ai\nVECTOR(1024, FLOAT32)"]
-    Ticket --> Oracle
-    RAG --> Oracle
-    Stats --> Oracle
-    Knowledge --> Redis["Redis Queue / Runtime State"]
-    RAG --> LLM["OpenAI-compatible Chat Provider"]
-    RAG --> Embed["SiliconFlow Embedding Provider"]
-```
+The default embedding provider is SiliconFlow.
 
-Core design choices:
+| Variable | Default | Description |
+| --- | --- | --- |
+| `AI_EMBEDDING_BASE_URL` | `https://api.siliconflow.cn/v1` | OpenAI-compatible embedding API base URL |
+| `AI_EMBEDDING_API_KEY` | empty | Embedding provider API key |
+| `AI_EMBEDDING_MODEL` | `Qwen/Qwen3-Embedding-8B` | Embedding model name |
+| `AI_EMBEDDING_DIMENSIONS` | `1024` | Embedding dimension, aligned with Oracle `VECTOR(1024, FLOAT32)` |
 
-- **Workflow state changes are centralized** in `TicketWorkflowService`.
-- **Assignment recommendation is read-only** and does not mutate ticket state until an admin uses the existing assignment action.
-- **SLA status is derived** from ticket status and `deadlineAt`, avoiding a background scheduler for the current demo scope.
-- **Secrets are externalized** through local env files and must never be committed.
+### Local Secret Files
 
-## Tech Stack
-
-### Backend
-
-- Java 21
-- Spring Boot 3.3.5
-- Spring Security
-- MyBatis 3.0.3
-- Flyway
-- Oracle JDBC 23.5
-- Redis
-- JJWT
-- Maven
-
-### Frontend
-
-- Vue 3.5
-- Vite 6
-- TypeScript 5.7
-- Pinia
-- Vue Router
-- Axios
-- Element Plus
-- ECharts
-- Vitest
-
-### Infrastructure
-
-- Oracle Free 23ai container
-- Redis 7 container
-- Docker Compose
-
-## Repository Layout
-
-```text
-.
-├── backend/                 # Spring Boot backend
-├── frontend/                # Vue 3 frontend
-├── docs/
-│   ├── acceptance/          # acceptance checklist
-│   ├── demo/                # final demo runbooks and demo corpus
-│   ├── evaluation/          # RAG evaluation set and reports
-│   ├── spikes/              # phase evidence and technical spikes
-│   └── superpowers/         # specs and implementation plans
-├── tools/smoke/             # repeatable smoke and evidence scripts
-├── docker-compose.yml       # Oracle 23ai + Redis
-└── .env.example             # local service env example
-```
-
-## Quick Start
-
-### 1. Clone and enter the project
-
-```bash
-git clone https://github.com/HelloWhatIsYourName/knowledge-ticket-system.git
-cd knowledge-ticket-system
-```
-
-If you are continuing the recovered local worktree used during development:
-
-```bash
-cd /Users/xianghuaifeng/Documents/毕业设计/.worktrees/recovered-phase31
-```
-
-### 2. Start local services
-
-```bash
-docker compose up -d
-docker compose ps
-```
-
-Expected services:
-
-- `ai-ticket-oracle` on port `1521`
-- `ai-ticket-redis` on port `6379`
-
-### 3. Configure provider secrets
-
-The application expects chat and embedding provider keys from environment variables. For the local defense environment, keep them outside the repository:
+For the local defense environment, keep provider keys outside the repository:
 
 ```bash
 /private/tmp/ai-ticket-secrets/siliconflow.env
 /private/tmp/ai-ticket-secrets/deepseek.env
 ```
 
-Example shell flow:
+Load them before starting the backend:
 
 ```bash
 set -a
@@ -175,11 +45,49 @@ source /private/tmp/ai-ticket-secrets/deepseek.env
 set +a
 ```
 
-Do not paste API keys into README, screenshots, logs, issues, commits, or pull requests.
+### Database and Redis
 
-### 4. Start the backend
+| Variable | Default | Description |
+| --- | --- | --- |
+| `APP_DATASOURCE_URL` | `jdbc:oracle:thin:@localhost:1521/FREEPDB1` | Oracle connection URL |
+| `APP_DATASOURCE_USERNAME` | `AI_TICKET` | Oracle application user |
+| `APP_DATASOURCE_PASSWORD` | `ai_ticket_pwd` | Oracle application password |
+| `APP_REDIS_HOST` | `localhost` | Redis host |
+| `APP_REDIS_PORT` | `6379` | Redis port |
+| `APP_JWT_SECRET` | `dev-only-change-me-to-a-long-random-secret` | JWT signing secret for local development |
 
-Use the Homebrew OpenJDK 21 path explicitly on this machine:
+`docker-compose.yml` starts Oracle 23ai and Redis with defaults matching the backend configuration.
+
+## 2. Run the Project
+
+### Prerequisites
+
+- Docker and Docker Compose
+- Java 21
+- Maven
+- Node.js and npm
+
+Use this Java 21 path on the current machine:
+
+```bash
+/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
+```
+
+Do not rely on `/usr/libexec/java_home -v 21`, because it may resolve to Java 17.
+
+### Start Infrastructure
+
+```bash
+docker compose up -d
+docker compose ps
+```
+
+Expected services:
+
+- Oracle 23ai on `localhost:1521`
+- Redis on `localhost:6379`
+
+### Start Backend
 
 ```bash
 cd backend
@@ -194,14 +102,6 @@ PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH \
 mvn spring-boot:run
 ```
 
-Do not rely on:
-
-```bash
-/usr/libexec/java_home -v 21
-```
-
-On the current development machine it may resolve to Java 17.
-
 Backend reachability check:
 
 ```bash
@@ -214,7 +114,7 @@ Expected unauthenticated response:
 HTTP/1.1 401
 ```
 
-### 5. Start the frontend
+### Start Frontend
 
 ```bash
 cd frontend
@@ -228,28 +128,19 @@ Open:
 http://127.0.0.1:5175
 ```
 
-## Demo Accounts
+### Demo Accounts
 
-| Role | Username | Password | Main Routes |
-| --- | --- | --- | --- |
-| Admin | `admin` | `Admin_123456` | `/app/knowledge`, `/app/tickets/manage`, `/app/admin/dashboard`, `/app/system` |
-| User | `user` | `Admin_123456` | `/app/ai/chat`, `/app/tickets/my` |
-| Agent | `agent` | `Admin_123456` | `/app/tickets/assigned` |
+| Role | Username | Password |
+| --- | --- | --- |
+| Admin | `admin` | `Admin_123456` |
+| User | `user` | `Admin_123456` |
+| Agent | `agent` | `Admin_123456` |
 
-Some recovered demo databases also include:
+Some recovered demo databases may also contain `agent2 / Admin_123456`. The assignment recommendation panel may choose `agent2` if it has the lowest active workload.
 
-| Role | Username | Password | Note |
-| --- | --- | --- | --- |
-| Second-line agent | `agent2` | `Admin_123456` | May be recommended when it has the lowest active workload |
+### Verification
 
-Assignment recommendation note:
-
-- Follow the assignee shown in the Smart Recommendation (`智能推荐`) panel.
-- If a defense script must use only `agent`, manually choose `agent` in the assignment dropdown instead of using the recommendation button.
-
-## Verification
-
-### Backend tests
+Backend:
 
 ```bash
 cd backend
@@ -258,7 +149,7 @@ PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH \
 mvn test
 ```
 
-### Frontend tests and build
+Frontend:
 
 ```bash
 cd frontend
@@ -266,10 +157,9 @@ npm run test
 npm run build
 ```
 
-### Acceptance evidence
+Full acceptance evidence:
 
 ```bash
-cd /Users/xianghuaifeng/Documents/毕业设计/.worktrees/recovered-phase31
 FRONTEND_BASE_URL=http://127.0.0.1:5175 \
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 PATH=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin:$PATH \
@@ -286,84 +176,63 @@ Frontend build                 PASS
 Backend documentation coverage PASS
 ```
 
-The acceptance script writes sanitized logs and redacts tokens.
+## 3. Original Project Goal
 
-## Documentation Index
+The original goal of this graduation project was to build a practical enterprise support platform that combines:
 
-### Start Here
+- AI knowledge-base question answering;
+- vector retrieval over enterprise documents;
+- ticket handoff when AI cannot fully solve the problem;
+- role-based collaboration between users, agents, and administrators;
+- traceable workflow records and management statistics.
 
-- [Final defense demo runbook](docs/demo/final-defense-runbook.md)
-- [V1 demo runbook](docs/demo/v1-demo-runbook.md)
-- [V1 live rehearsal checklist](docs/demo/v1-live-rehearsal-checklist.md)
-- [V1 acceptance checklist](docs/acceptance/v1-acceptance-checklist.md)
+The first version focused on making the core path work end to end:
 
-### Demo and Evaluation
+```text
+Knowledge base -> RAG answer -> AI-to-ticket handoff -> admin assignment -> agent processing -> user closure -> admin statistics
+```
 
-- [Demo corpus guide](docs/demo/v1-demo-corpus.md)
-- [Demo corpus JSON](docs/demo/v1-demo-corpus.json)
-- [Live rehearsal audit](docs/demo/v1-live-rehearsal-audit.md)
-- [RAG evaluation set guide](docs/evaluation/rag-evaluation-set.md)
-- [RAG evaluation set JSON](docs/evaluation/rag-evaluation-set.json)
-- [RAG live evaluation report](docs/evaluation/rag-live-evaluation-report.md)
+The current implementation also includes two later extensions:
 
-### Architecture and Specs
+- assignment recommendation based on active agent workload;
+- priority-based SLA deadline and status visibility.
 
-- [Overall system design](docs/superpowers/specs/2026-06-19-ai-knowledge-ticket-system-design.md)
-- [V1 project plan](docs/superpowers/specs/2026-06-19-ai-knowledge-ticket-v1-project-plan.md)
-- [Auth/RBAC backend design](docs/superpowers/specs/2026-06-19-auth-rbac-backend-design.md)
-- [SiliconFlow embedding provider design](docs/superpowers/specs/2026-06-19-siliconflow-embedding-provider-design.md)
-- [RAG chat design](docs/superpowers/specs/2026-06-20-phase-4-rag-chat-design.md)
-- [Ticket workflow design](docs/superpowers/specs/2026-06-20-phase-5-ticket-workflow-design.md)
-- [Public homepage and product shell design](docs/superpowers/specs/2026-06-20-public-homepage-product-shell-design.md)
-- [Assignment recommendation and SLA design](docs/superpowers/specs/2026-06-23-phase-39-40-assignment-sla-design.md)
+Advanced features such as automatic assignment, background SLA escalation, notification delivery, multi-department approval, and production deployment remain future extensions.
 
-### Implementation Plans
+## 4. Useful Documents
 
-- [Phase 31 acceptance evidence plan](docs/superpowers/plans/2026-06-20-phase-31-acceptance-evidence-implementation-plan.md)
-- [Phase 32 recovery stabilization plan](docs/superpowers/plans/2026-06-22-phase-32-recovery-stabilization-implementation-plan.md)
-- [Phase 39/40 assignment recommendation and SLA plan](docs/superpowers/plans/2026-06-23-phase-39-40-assignment-sla-implementation-plan.md)
-- [Phase 43 final demo stabilization plan](docs/superpowers/plans/2026-06-23-phase-43-final-demo-stabilization-implementation-plan.md)
+Only the main documents needed for review, defense, or continued development are listed here.
 
-For the full phase history, see [docs/superpowers/plans](docs/superpowers/plans).
+| Document | Purpose |
+| --- | --- |
+| [Final defense demo runbook](docs/demo/final-defense-runbook.md) | Step-by-step manual demo path |
+| [V1 acceptance checklist](docs/acceptance/v1-acceptance-checklist.md) | Acceptance criteria and evidence mapping |
+| [V1 project plan](docs/superpowers/specs/2026-06-19-ai-knowledge-ticket-v1-project-plan.md) | Original project goals, scope, and extensibility plan |
+| [Overall system design](docs/superpowers/specs/2026-06-19-ai-knowledge-ticket-system-design.md) | Architecture and domain design |
+| [Assignment recommendation and SLA design](docs/superpowers/specs/2026-06-23-phase-39-40-assignment-sla-design.md) | Phase 39/40 feature design |
+| [Phase 39/40 implementation plan](docs/superpowers/plans/2026-06-23-phase-39-40-assignment-sla-implementation-plan.md) | Implementation and verification checklist |
+| [RAG evaluation set](docs/evaluation/rag-evaluation-set.md) | Evaluation method for retrieval and answer quality |
 
-### Technical Spikes and Evidence
+## 5. Repository Structure
 
-- [Oracle vector spike](docs/spikes/oracle-vector-spike.md)
-- [Knowledge-base vector retrieval](docs/spikes/knowledge-base-vector-retrieval.md)
-- [Phase 4 RAG chat](docs/spikes/phase-4-rag-chat.md)
-- [Phase 5 ticket workflow](docs/spikes/phase-5-ticket-workflow.md)
-- [Phase 6 admin dashboard](docs/spikes/phase-6-admin-dashboard.md)
-- [Phase 7 quality and thesis materials](docs/spikes/phase-7-quality-and-thesis-materials.md)
-- [Phase 8 frontend integration](docs/spikes/phase-8-frontend-integration.md)
+```text
+.
+├── backend/                 # Spring Boot backend
+├── frontend/                # Vue 3 frontend
+├── docs/                    # design, demo, acceptance, and evaluation documents
+├── tools/smoke/             # smoke and acceptance scripts
+├── docker-compose.yml       # Oracle 23ai and Redis
+└── .env.example             # local environment example
+```
 
-## Security Notes
+## 6. Security Notes
 
-- Never commit provider keys, JWTs, `.env` files, or local secret files.
-- Keep SiliconFlow and DeepSeek credentials outside the repository.
-- Smoke scripts must redact tokens before writing evidence.
-- The demo passwords are seeded local accounts for a controlled development/demo environment.
-- Rotate credentials before deploying anywhere beyond local defense rehearsal.
+- Do not commit API keys, JWTs, `.env` files, or local secret files.
+- Keep DeepSeek and SiliconFlow credentials outside the repository.
+- Smoke and acceptance scripts redact tokens before writing evidence.
+- Demo passwords are for local development and defense rehearsal only.
+- Rotate all credentials before deploying outside a local environment.
 
-## Roadmap
+## 7. License
 
-Already implemented:
-
-- AI knowledge-base retrieval and RAG chat
-- AI-to-ticket handoff
-- full manual ticket workflow
-- assignment recommendation
-- priority-based SLA visibility
-- admin statistics and system administration
-
-Reasonable next extensions:
-
-- background SLA escalation and notification delivery;
-- configurable SLA policy table;
-- skill-based assignment with agent tags;
-- richer ticket analytics and agent workload dashboards;
-- multi-department approval workflow;
-- production packaging and deployment manifests.
-
-## License
-
-No open-source license has been declared yet. Add a `LICENSE` file before distributing this project as an open-source package.
+This project is released under the MIT License. See [LICENSE](LICENSE).

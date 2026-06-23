@@ -51,3 +51,13 @@ Commit message:
 ```bash
 docs: add final defense demo runbook
 ```
+
+- [x] ⭐ **Task 6: Simplify README for final handoff**
+
+Replace the broad open-source style README with a concise English handoff README focused on:
+
+- API/provider configuration;
+- project startup;
+- original project goal;
+- useful documentation index only;
+- MIT license link.
