@@ -252,3 +252,44 @@ git commit -m "style: polish app ui with apple inspired design"
 - [x] ⭐ **Step 3: Push**
 
 Push to the active branch first. If the user wants release/main updated, push the resulting commit to `HelloWhatIsYourName/ticket-system.git main`.
+
+### Task 7: Fix Ticket Table Narrow-Viewport Layout
+
+**Files:**
+- Modify: `frontend/src/styles/main.css`
+
+- [x] ⭐ **Step 1: Reproduce the table overflow**
+
+Use the browser on `http://127.0.0.1:5175/app/tickets/manage` or `http://127.0.0.1:5175/app/tickets/assigned` and inspect the first ticket row.
+
+Observed root cause:
+
+- first column width was `170px`;
+- long ticket numbers measured around `227px`;
+- grid children had `min-width: auto`;
+- ticket number and title text had `overflow: visible`;
+- the Phase 44 table override used `overflow: hidden`, clipping narrow tables instead of allowing horizontal scroll.
+
+- [x] ⭐ **Step 2: Constrain long table text**
+
+Update `.ticket-row`, `.ticket-row > *`, `.ticket-no`, `.ticket-row strong`, and `.ticket-row small` so long ticket numbers and titles cannot visually overlap adjacent columns.
+
+- [x] ⭐ **Step 3: Restore horizontal table scrolling when needed**
+
+Update `.ticket-table` to use horizontal scrolling for narrow viewports:
+
+```css
+.ticket-table {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+```
+
+- [x] ⭐ **Step 4: Verify table layout**
+
+Use browser computed-style checks to confirm:
+
+- `.ticket-no` has `overflow: hidden`, `text-overflow: ellipsis`, and `white-space: nowrap`;
+- title text has the same single-line truncation behavior;
+- no visible overlap between the ticket number and title columns.

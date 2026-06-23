@@ -1516,12 +1516,23 @@ select {
 
 .ticket-row {
   display: grid;
-  grid-template-columns: 170px minmax(220px, 1fr) 110px 90px 130px 110px 140px;
+  grid-template-columns:
+    minmax(220px, 0.92fr)
+    minmax(280px, 1.45fr)
+    minmax(92px, 0.42fr)
+    minmax(82px, 0.34fr)
+    minmax(126px, 0.54fr)
+    minmax(96px, 0.38fr)
+    minmax(136px, 0.54fr);
   gap: 14px;
   align-items: center;
   padding: 16px 18px;
   border-top: 1px solid var(--home-line);
   color: #334155;
+}
+
+.ticket-row > * {
+  min-width: 0;
 }
 
 .ticket-row:first-child {
@@ -1537,9 +1548,13 @@ select {
 }
 
 .ticket-no {
+  display: block;
+  overflow: hidden;
   color: var(--home-accent-strong);
   font-weight: 760;
+  text-overflow: ellipsis;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .ticket-no:hover {
@@ -1549,6 +1564,9 @@ select {
 .ticket-row strong,
 .ticket-row small {
   display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ticket-row small {
@@ -2167,7 +2185,7 @@ select {
   }
 
   .ticket-row {
-    min-width: 1000px;
+    min-width: 1120px;
   }
 
   .demo-guide-layout {
@@ -2690,7 +2708,9 @@ select {
 }
 
 .ticket-table {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .ticket-row {
