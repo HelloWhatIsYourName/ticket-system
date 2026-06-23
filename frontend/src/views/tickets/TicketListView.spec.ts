@@ -145,4 +145,40 @@ describe('TicketListView', () => {
     expect(listMyTicketsMock).not.toHaveBeenCalled()
     expect(listAssignedTicketsMock).not.toHaveBeenCalled()
   })
+
+  it('exposes responsive labels for mobile ticket cards', async () => {
+    listMyTicketsMock.mockResolvedValue([
+      {
+        id: 4,
+        ticketNo: 'TK-20260620-0004',
+        title: '移动端布局检查',
+        status: 'PROCESSING',
+        priority: 'LOW',
+        source: 'AI_SESSION',
+        transferReason: '移动端需要完整展示字段',
+        deadlineAt: '2026-06-21T09:30:00',
+        slaStatus: 'ON_TRACK',
+        slaRemainingMinutes: 600,
+        createdAt: '2026-06-20T13:00:00'
+      }
+    ])
+
+    const wrapper = mount(TicketListView, {
+      global: {
+        stubs: {
+          RouterLink: {
+            props: ['to'],
+            template: '<a :href="to"><slot /></a>'
+          }
+        }
+      }
+    })
+    await flushPromises()
+
+    expect(wrapper.find('[data-label="状态"]').exists()).toBe(true)
+    expect(wrapper.find('[data-label="优先级"]').exists()).toBe(true)
+    expect(wrapper.find('[data-label="SLA"]').exists()).toBe(true)
+    expect(wrapper.find('[data-label="来源"]').exists()).toBe(true)
+    expect(wrapper.find('[data-label="创建时间"]').exists()).toBe(true)
+  })
 })

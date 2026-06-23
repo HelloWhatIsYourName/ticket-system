@@ -142,23 +142,23 @@ watch(() => route.name, loadTickets, { immediate: true })
         <span>创建时间</span>
       </div>
       <article v-for="ticket in tickets" :key="ticket.id" class="ticket-row">
-        <RouterLink class="ticket-no" :to="`/app/tickets/${ticket.id}`">{{ ticket.ticketNo }}</RouterLink>
-        <span>
+        <RouterLink class="ticket-no ticket-cell-no" :to="`/app/tickets/${ticket.id}`">{{ ticket.ticketNo }}</RouterLink>
+        <span class="ticket-cell-title">
           <strong>{{ ticket.title }}</strong>
           <small>{{ ticket.transferReason || '暂无转人工原因' }}</small>
         </span>
-        <span>
+        <span class="ticket-cell-status" data-label="状态">
           <mark class="ticket-chip">{{ formatStatus(ticket.status) }}</mark>
         </span>
-        <span>{{ formatPriority(ticket.priority) }}</span>
-        <span>
+        <span class="ticket-cell-priority" data-label="优先级">{{ formatPriority(ticket.priority) }}</span>
+        <span class="ticket-cell-sla" data-label="SLA">
           <mark class="ticket-chip" :class="`sla-${ticket.slaStatus || 'unknown'}`">
             {{ formatSla(ticket.slaStatus) }}
           </mark>
           <small v-if="ticket.deadlineAt">{{ formatDate(ticket.deadlineAt) }}</small>
         </span>
-        <span>{{ formatSource(ticket.source) }}</span>
-        <span>{{ formatDate(ticket.createdAt) }}</span>
+        <span class="ticket-cell-source" data-label="来源">{{ formatSource(ticket.source) }}</span>
+        <span class="ticket-cell-created" data-label="创建时间">{{ formatDate(ticket.createdAt) }}</span>
       </article>
     </section>
   </section>
