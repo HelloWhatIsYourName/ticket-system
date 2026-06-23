@@ -1306,7 +1306,7 @@ git commit -m "feat: show assignment recommendation in ticket detail"
 **Files:**
 - Modify: `docs/superpowers/plans/2026-06-23-phase-39-40-assignment-sla-implementation-plan.md`
 
-- [ ] **Step 1: Run backend tests**
+- [x] ⭐ **Step 1: Run backend tests**
 
 ```bash
 cd backend
@@ -1317,7 +1317,7 @@ mvn test
 
 Expected: `Tests run` with `Failures: 0, Errors: 0`.
 
-- [ ] **Step 2: Run frontend tests**
+- [x] ⭐ **Step 2: Run frontend tests**
 
 ```bash
 cd frontend
@@ -1326,7 +1326,7 @@ npm run test
 
 Expected: all frontend tests pass.
 
-- [ ] **Step 3: Run frontend build**
+- [x] ⭐ **Step 3: Run frontend build**
 
 ```bash
 cd frontend
@@ -1335,7 +1335,7 @@ npm run build
 
 Expected: Vite build succeeds.
 
-- [ ] **Step 4: Run acceptance evidence**
+- [x] ⭐ **Step 4: Run acceptance evidence**
 
 ```bash
 cd /Users/xianghuaifeng/Documents/毕业设计/.worktrees/recovered-phase31
@@ -1347,7 +1347,7 @@ tools/smoke/phase31-acceptance-evidence.sh
 
 Expected: report has PASS for backend smoke, frontend dev smoke, frontend tests, frontend build, backend documentation coverage.
 
-- [ ] **Step 5: Browser acceptance**
+- [x] ⭐ **Step 5: Browser acceptance**
 
 Using Chrome/in-app browser:
 
@@ -1363,11 +1363,11 @@ Using Chrome/in-app browser:
 10. Login as `agent / Admin_123456` and open `/app/tickets/assigned`.
 11. Confirm SLA chip appears for assigned tickets.
 
-- [ ] **Step 6: Update plan checkbox**
+- [x] ⭐ **Step 6: Update plan checkbox**
 
 Mark Task 7 `[x] ⭐`.
 
-- [ ] **Step 7: Commit verification plan update**
+- [x] ⭐ **Step 7: Commit verification plan update**
 
 ```bash
 git add docs/superpowers/plans/2026-06-23-phase-39-40-assignment-sla-implementation-plan.md
