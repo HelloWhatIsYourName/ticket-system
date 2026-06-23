@@ -306,6 +306,7 @@ Only the documents needed for review, defense, or continued development are list
 | Document | Purpose |
 | --- | --- |
 | [Final defense demo runbook](docs/demo/final-defense-runbook.md) | Manual demo path and acceptance walkthrough |
+| [Final thesis and defense materials](docs/thesis/README.md) | Thesis DOCX and defense PPTX |
 | [V1 acceptance checklist](docs/acceptance/v1-acceptance-checklist.md) | Acceptance criteria and evidence mapping |
 | [Original project plan](docs/superpowers/specs/2026-06-19-ai-knowledge-ticket-v1-project-plan.md) | Initial graduation-design goals and scope |
 | [System design](docs/superpowers/specs/2026-06-19-ai-knowledge-ticket-system-design.md) | Architecture, domains, and workflow design |
