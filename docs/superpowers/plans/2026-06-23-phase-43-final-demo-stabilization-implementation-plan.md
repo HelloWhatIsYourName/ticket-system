@@ -61,3 +61,28 @@ Replace the broad open-source style README with a concise English handoff README
 - original project goal;
 - useful documentation index only;
 - MIT license link.
+
+- [x] ⭐ **Task 7: Restyle README with high-star open-source conventions**
+
+Rework `README.md` into a polished open-source style while keeping the content practical:
+
+- centered project header;
+- shields and quick navigation;
+- clear product summary;
+- feature table;
+- Mermaid architecture diagram;
+- quick start;
+- API configuration;
+- compact documentation index;
+- MIT license section.
+
+- [x] ⭐ **Task 8: Refine README after open-source style review**
+
+Adjust `README.md` after review feedback so it reads more like a mature high-star GitHub project while still keeping the required practical content:
+
+- stronger product positioning at the top;
+- API configuration before startup details;
+- clearer local run flow;
+- compact feature and demo workflow sections;
+- useful documentation index only;
+- MIT license ending.
