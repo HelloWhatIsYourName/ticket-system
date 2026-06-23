@@ -171,7 +171,7 @@ git diff --check
 git diff | rg -n "(?i)(api[_-]?key|secret|token|sk-|accessToken)" || true
 ```
 
-- [ ] **Step 5: Commit and push**
+- [x] ⭐ **Step 5: Commit and push**
 
 Commit:
 
