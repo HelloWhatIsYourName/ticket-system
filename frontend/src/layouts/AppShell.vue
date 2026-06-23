@@ -7,6 +7,7 @@ const auth = useAuthStore()
 const router = useRouter()
 
 const displayName = computed(() => auth.user?.displayName || auth.user?.username || '未登录用户')
+const avatarInitial = computed(() => displayName.value.slice(0, 1).toUpperCase())
 const fallbackMenus = [
   { code: 'demo-guide', name: '演示导览', path: '/app/demo' },
   { code: 'ai-chat', name: 'AI 问答', path: '/app/ai/chat' },
@@ -27,7 +28,10 @@ function logout() {
 <template>
   <div class="app-shell">
     <aside class="app-sidebar" aria-label="Application navigation">
-      <RouterLink class="app-shell-brand" to="/">AI Knowledge Ticket</RouterLink>
+      <div class="app-sidebar-head">
+        <RouterLink class="app-shell-brand" to="/">AI Knowledge Ticket</RouterLink>
+        <span>Service Desk</span>
+      </div>
       <nav class="app-shell-menu">
         <RouterLink v-for="menu in menus" :key="menu.code || menu.path" :to="menu.path">
           {{ menu.name }}
@@ -42,6 +46,7 @@ function logout() {
           <h2>服务工作台</h2>
         </div>
         <div class="app-user">
+          <span class="app-user-avatar">{{ avatarInitial }}</span>
           <span>{{ displayName }}</span>
           <button type="button" @click="logout">退出</button>
         </div>

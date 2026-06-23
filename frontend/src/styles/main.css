@@ -9,6 +9,27 @@
   --home-line: #d8e1e5;
   --home-accent: #0f766e;
   --home-accent-strong: #0b4f4a;
+  --app-bg: #f5f5f7;
+  --app-surface: #ffffff;
+  --app-surface-soft: #fbfbfd;
+  --app-surface-elevated: rgb(255 255 255 / 0.82);
+  --app-text: #1d1d1f;
+  --app-muted: #6e6e73;
+  --app-muted-strong: #424245;
+  --app-blue: #0066cc;
+  --app-blue-hover: #0071e3;
+  --app-blue-soft: #e8f2ff;
+  --app-border: #d2d2d7;
+  --app-border-soft: #e8e8ed;
+  --app-danger: #b42318;
+  --app-danger-soft: #fff1f0;
+  --app-warning: #8a5a00;
+  --app-warning-soft: #fff7e6;
+  --app-success: #137333;
+  --app-success-soft: #eaf7ee;
+  --app-radius-card: 18px;
+  --app-radius-control: 12px;
+  --app-radius-pill: 999px;
   font-family:
     ui-sans-serif,
     system-ui,
@@ -2177,5 +2198,607 @@ select {
   .dashboard-stat-grid,
   .dashboard-panels {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Phase 44: Apple-inspired application UI. Home page selectors above stay unchanged. */
+.login-view,
+.app-shell {
+  color: var(--app-text);
+  background:
+    radial-gradient(circle at 18% 0%, rgb(255 255 255 / 0.94), transparent 34%),
+    linear-gradient(180deg, #fbfbfd 0%, var(--app-bg) 42%, #ededf2 100%);
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.login-panel {
+  max-width: 430px;
+  border: 1px solid rgb(210 210 215 / 0.72);
+  border-radius: 24px;
+  background: rgb(255 255 255 / 0.86);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 30px 80px rgb(0 0 0 / 0.08);
+  backdrop-filter: blur(28px) saturate(180%);
+}
+
+.login-back {
+  color: var(--app-blue);
+  font-weight: 500;
+}
+
+.login-panel h2,
+.app-topbar h2,
+.workspace-page-header h3,
+.dashboard-header h3,
+.ticket-hero-panel h3 {
+  color: var(--app-text);
+  font-weight: 650;
+  letter-spacing: -0.024em;
+}
+
+.login-panel p,
+.placeholder-view p,
+.workspace-page-header > span,
+.transfer-reason,
+.panel-copy,
+.transfer-message,
+.system-copy {
+  color: var(--app-muted);
+}
+
+.login-panel label,
+.question-form label,
+.transfer-form label,
+.comment-form label,
+.ticket-assignment-form label,
+.action-comment-field,
+.knowledge-form label {
+  color: var(--app-muted-strong);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.login-panel input,
+.question-form textarea,
+.transfer-form textarea,
+.transfer-form input,
+.question-actions select,
+.transfer-form select,
+.comment-form select,
+.comment-form textarea,
+.ticket-assignment-form select,
+.action-comment-field textarea,
+.knowledge-form input,
+.knowledge-form textarea,
+.knowledge-form select {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-control);
+  background: rgb(255 255 255 / 0.94);
+  color: var(--app-text);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.login-panel input:focus,
+.question-form textarea:focus,
+.transfer-form textarea:focus,
+.transfer-form input:focus,
+.question-actions select:focus,
+.transfer-form select:focus,
+.comment-form select:focus,
+.comment-form textarea:focus,
+.ticket-assignment-form select:focus,
+.action-comment-field textarea:focus,
+.knowledge-form input:focus,
+.knowledge-form textarea:focus,
+.knowledge-form select:focus {
+  border-color: var(--app-blue-hover);
+  outline: 0;
+  box-shadow: 0 0 0 4px rgb(0 102 204 / 0.14);
+  background: #ffffff;
+}
+
+.login-panel button,
+.app-user button,
+.question-actions button,
+.transfer-form button,
+.comment-form button,
+.ticket-assignment-form button,
+.ticket-action-grid button,
+.knowledge-form button,
+.system-user-row button,
+.role-assignment-form button {
+  min-height: 42px;
+  border: 0;
+  border-radius: var(--app-radius-pill);
+  color: #ffffff;
+  background: var(--app-blue);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    opacity 160ms ease;
+}
+
+.login-panel button:hover,
+.app-user button:hover,
+.question-actions button:hover,
+.transfer-form button:hover,
+.comment-form button:hover,
+.ticket-assignment-form button:hover,
+.ticket-action-grid button:hover,
+.knowledge-form button:hover,
+.system-user-row button:hover,
+.role-assignment-form button:hover {
+  background: var(--app-blue-hover);
+}
+
+.login-panel button:active,
+.app-user button:active,
+.question-actions button:active,
+.transfer-form button:active,
+.comment-form button:active,
+.ticket-assignment-form button:active,
+.ticket-action-grid button:active,
+.knowledge-form button:active,
+.system-user-row button:active,
+.role-assignment-form button:active {
+  transform: scale(0.97);
+}
+
+.login-panel button:disabled,
+.question-actions button:disabled,
+.transfer-form button:disabled,
+.comment-form button:disabled,
+.ticket-assignment-form button:disabled,
+.ticket-action-grid button:disabled,
+.knowledge-form button:disabled,
+.system-user-row button:disabled,
+.role-assignment-form button:disabled {
+  background: #a7a7ad;
+  cursor: not-allowed;
+  opacity: 0.74;
+}
+
+.login-error {
+  border: 1px solid rgb(180 35 24 / 0.18);
+  border-radius: var(--app-radius-control);
+  color: var(--app-danger);
+  background: var(--app-danger-soft);
+}
+
+.app-shell {
+  grid-template-columns: 272px minmax(0, 1fr);
+}
+
+.app-sidebar {
+  gap: 26px;
+  padding: 24px 18px;
+  border-right: 1px solid var(--app-border-soft);
+  background: rgb(255 255 255 / 0.78);
+  backdrop-filter: blur(24px) saturate(180%);
+}
+
+.app-sidebar-head {
+  display: grid;
+  gap: 5px;
+  padding: 4px 8px 14px;
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.app-sidebar-head span {
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.app-shell-brand {
+  color: var(--app-text);
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.026em;
+}
+
+.app-shell-menu {
+  gap: 5px;
+}
+
+.app-shell-menu a {
+  min-height: 40px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--app-radius-control);
+  color: var(--app-muted-strong);
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.app-shell-menu a.router-link-active,
+.app-shell-menu a:hover {
+  border-color: rgb(0 102 204 / 0.12);
+  color: var(--app-blue);
+  background: var(--app-blue-soft);
+}
+
+.app-workspace {
+  background: transparent;
+}
+
+.app-topbar {
+  position: sticky;
+  z-index: 8;
+  top: 0;
+  min-height: 76px;
+  border-bottom: 1px solid rgb(210 210 215 / 0.72);
+  background: rgb(245 245 247 / 0.82);
+  backdrop-filter: blur(22px) saturate(180%);
+}
+
+.app-topbar-label,
+.dashboard-header p,
+.workspace-page-header p,
+.panel-heading,
+.dashboard-stat span,
+.ticket-row-head,
+.ticket-ai-context dt,
+.knowledge-document-item dt {
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.app-user {
+  gap: 10px;
+  padding: 5px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-pill);
+  background: rgb(255 255 255 / 0.76);
+}
+
+.app-user > span:not(.app-user-avatar) {
+  color: var(--app-muted-strong);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.app-user-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #ffffff;
+  background: linear-gradient(180deg, #2f7de1, var(--app-blue));
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.app-user button {
+  min-height: 32px;
+  padding: 0 13px;
+  font-size: 13px;
+}
+
+.app-content {
+  width: min(100%, 1480px);
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.placeholder-view,
+.state-panel,
+.dashboard-stat,
+.dashboard-panel,
+.rag-panel,
+.ticket-table,
+.ticket-detail-panel,
+.knowledge-panel,
+.system-panel,
+.demo-step {
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-card);
+  background: rgb(255 255 255 / 0.92);
+  box-shadow: none;
+}
+
+.placeholder-view,
+.state-panel {
+  padding: 24px;
+}
+
+.state-panel.error {
+  border-color: rgb(180 35 24 / 0.2);
+  color: var(--app-danger);
+  background: var(--app-danger-soft);
+}
+
+.state-panel.empty {
+  background: var(--app-surface-soft);
+}
+
+.state-skeleton {
+  background: linear-gradient(90deg, #e8e8ed, #ffffff, #e8e8ed);
+}
+
+.dashboard-stat {
+  min-height: 132px;
+  padding: 24px;
+}
+
+.dashboard-stat strong {
+  color: var(--app-text);
+  font-size: 34px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.dashboard-panel {
+  padding: 24px;
+}
+
+.dashboard-panel h4,
+.demo-step h4,
+.permission-module h4 {
+  color: var(--app-text);
+  font-weight: 650;
+  letter-spacing: -0.018em;
+}
+
+.dashboard-list li {
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.dashboard-list span,
+.ticket-row,
+.ticket-ai-context dd,
+.comment-item p,
+.flow-log-item span,
+.knowledge-document-item dd,
+.knowledge-document-item p,
+.knowledge-result-item p,
+.demo-step p,
+.citation-card p,
+.ticket-hero-panel p,
+.ticket-recommendation-panel p {
+  color: var(--app-muted-strong);
+}
+
+.dashboard-list strong,
+.panel-heading strong,
+.ticket-no,
+.flow-log-item strong,
+.demo-step a,
+.citation-card span {
+  color: var(--app-blue);
+}
+
+.workspace-page-header {
+  padding: 0 2px;
+}
+
+.rag-panel,
+.ticket-detail-panel,
+.knowledge-panel,
+.system-panel,
+.demo-step {
+  padding: 22px;
+}
+
+.session-item,
+.citation-card,
+.comment-item,
+.flow-log-item,
+.knowledge-document-item,
+.knowledge-result-item,
+.system-user-row,
+.system-role-item,
+.permission-module,
+.role-check-row {
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-control);
+  background: var(--app-surface-soft);
+  box-shadow: none;
+}
+
+.session-item {
+  color: var(--app-text);
+}
+
+.session-item span,
+.ticket-row small,
+.comment-item time,
+.flow-log-item time,
+.system-user-row > div > span,
+.system-role-item span,
+.role-check-row small {
+  color: var(--app-muted);
+}
+
+.session-item.is-active,
+.session-item:hover,
+.system-user-row.is-selected,
+.system-user-row:hover {
+  border-color: rgb(0 102 204 / 0.22);
+  background: var(--app-blue-soft);
+}
+
+.answer-panel {
+  border: 1px solid rgb(0 102 204 / 0.16);
+  border-radius: var(--app-radius-card);
+  background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
+}
+
+.answer-panel p {
+  color: var(--app-text);
+}
+
+.answer-meta span,
+.ticket-chip,
+.ticket-detail-meta span,
+.comment-item mark,
+.knowledge-document-item span,
+.knowledge-result-item span,
+.system-user-roles mark,
+.system-status,
+.permission-module span,
+.demo-step span {
+  border-radius: var(--app-radius-pill);
+  color: var(--app-blue);
+  background: var(--app-blue-soft);
+  font-weight: 650;
+}
+
+.answer-meta .is-muted,
+.comment-item mark.is-internal,
+.ticket-chip.sla-DUE_SOON {
+  color: var(--app-warning);
+  background: var(--app-warning-soft);
+}
+
+.ticket-chip.sla-ON_TRACK {
+  color: var(--app-success);
+  background: var(--app-success-soft);
+}
+
+.ticket-chip.sla-OVERDUE {
+  color: var(--app-danger);
+  background: var(--app-danger-soft);
+}
+
+.ticket-chip.sla-COMPLETED {
+  color: var(--app-blue);
+  background: var(--app-blue-soft);
+}
+
+.ticket-table {
+  overflow: hidden;
+}
+
+.ticket-row {
+  border-top: 1px solid var(--app-border-soft);
+}
+
+.ticket-row-head {
+  background: #f7f7fa;
+}
+
+.ticket-no {
+  text-decoration-color: rgb(0 102 204 / 0.3);
+  text-underline-offset: 3px;
+}
+
+.ticket-detail-side,
+.transfer-panel {
+  top: 100px;
+}
+
+.ticket-recommendation-panel {
+  border: 1px solid rgb(0 102 204 / 0.18);
+  border-radius: var(--app-radius-control);
+  background: var(--app-blue-soft);
+}
+
+.knowledge-document-item h4,
+.knowledge-result-item h4,
+.citation-card h4,
+.system-user-row strong,
+.system-role-item strong,
+.ticket-row strong {
+  color: var(--app-text);
+  font-weight: 650;
+}
+
+.knowledge-document-item dl {
+  padding-top: 10px;
+  border-top: 1px solid var(--app-border-soft);
+}
+
+.system-user-row button,
+.role-assignment-form button {
+  padding: 0 14px;
+}
+
+.role-check-row {
+  background: #ffffff;
+}
+
+.role-check-row input {
+  accent-color: var(--app-blue);
+}
+
+.demo-step {
+  min-height: 220px;
+}
+
+.demo-step a {
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 1180px) {
+  .app-content {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 860px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .app-sidebar {
+    gap: 16px;
+    padding: 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--app-border-soft);
+  }
+
+  .app-sidebar-head {
+    padding: 0 4px 12px;
+  }
+
+  .app-shell-menu {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .app-shell-menu a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .app-topbar {
+    align-items: stretch;
+    flex-direction: column;
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .app-user {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .app-content {
+    padding: 18px;
   }
 }
