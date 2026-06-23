@@ -335,7 +335,10 @@ onMounted(async () => {
           <p>{{ ticket.description }}</p>
         </section>
 
-        <section class="ticket-detail-panel" v-if="ticket.aiSummary || ticket.aiSuggestion || ticket.transferReason">
+        <section
+          class="ticket-detail-panel ticket-context-panel"
+          v-if="ticket.aiSummary || ticket.aiSuggestion || ticket.transferReason"
+        >
           <div class="panel-heading">
             <span>AI 转人工上下文</span>
           </div>
@@ -355,7 +358,7 @@ onMounted(async () => {
           </dl>
         </section>
 
-        <section class="ticket-detail-panel">
+        <section class="ticket-detail-panel ticket-comments-panel">
           <div class="panel-heading">
             <span>沟通记录</span>
             <strong>{{ comments.length }}</strong>
@@ -389,7 +392,7 @@ onMounted(async () => {
       </main>
 
       <aside class="ticket-detail-side">
-        <section class="ticket-detail-panel">
+        <section class="ticket-detail-panel ticket-sla-panel">
           <div class="panel-heading">
             <span>SLA 状态</span>
             <strong>{{ formatSla(ticket.slaStatus) }}</strong>
@@ -410,7 +413,7 @@ onMounted(async () => {
           </dl>
         </section>
 
-        <section class="ticket-detail-panel">
+        <section class="ticket-detail-panel ticket-action-panel">
           <div class="panel-heading">
             <span>状态动作</span>
           </div>
@@ -505,7 +508,7 @@ onMounted(async () => {
           <EmptyState v-else message="当前状态暂无可执行动作" />
         </section>
 
-        <section class="ticket-detail-panel">
+        <section class="ticket-detail-panel ticket-flow-panel">
           <div class="panel-heading">
             <span>流程记录</span>
             <strong>{{ ticket.flowLogs.length }}</strong>

@@ -1273,7 +1273,9 @@ select {
 
 .workspace-page-header h3 {
   margin: 0;
+  min-width: 0;
   font-size: 28px;
+  overflow-wrap: anywhere;
 }
 
 .workspace-page-header > span {
@@ -2174,6 +2176,68 @@ select {
 
   .rag-layout {
     grid-template-columns: 1fr;
+  }
+
+  .ticket-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-detail-main,
+  .ticket-detail-side {
+    display: contents;
+  }
+
+  .ticket-hero-panel {
+    order: 1;
+  }
+
+  .ticket-sla-panel {
+    order: 2;
+  }
+
+  .ticket-action-panel {
+    order: 3;
+  }
+
+  .ticket-context-panel {
+    order: 4;
+  }
+
+  .ticket-comments-panel {
+    order: 5;
+  }
+
+  .ticket-flow-panel {
+    order: 6;
+  }
+
+  .ticket-detail-panel {
+    min-width: 0;
+    padding: 18px;
+  }
+
+  .ticket-detail-meta {
+    gap: 6px;
+  }
+
+  .ticket-hero-panel h3 {
+    overflow-wrap: anywhere;
+    font-size: 22px;
+  }
+
+  .ticket-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-action-grid button,
+  .comment-form button,
+  .ticket-assignment-form button {
+    width: 100%;
+  }
+
+  .comment-item div {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .question-actions label {

@@ -461,4 +461,62 @@ describe('TicketDetailView', () => {
     expect(wrapper.text()).toContain('确认问题已解决')
     expect(wrapper.text()).toContain('已关闭')
   })
+
+  it('exposes responsive panel hooks for detail page layout', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const auth = useAuthStore()
+    auth.permissions = ['ticket:process']
+    auth.user = { id: 3, username: 'agent', displayName: 'Agent' }
+
+    getTicketMock.mockResolvedValue({
+      id: 8,
+      ticketNo: 'TK-20260620-0001',
+      title: '无法登录后台',
+      description: '用户反馈后台登录失败。',
+      status: 'PENDING_PROCESS',
+      priority: 'HIGH',
+      source: 'AI_SESSION',
+      assigneeId: 3,
+      creatorId: 2,
+      transferReason: 'AI 置信度低，需要人工处理',
+      aiSummary: '用户无法登录后台',
+      aiSuggestion: '检查账号状态和密码策略',
+      deadlineAt: '2026-06-20T18:00:00',
+      slaStatus: 'DUE_SOON',
+      slaRemainingMinutes: 90,
+      createdAt: '2026-06-20T10:00:00',
+      flowLogs: [
+        {
+          id: 1,
+          ticketId: 8,
+          action: 'CREATE',
+          operatorId: 2,
+          commentText: 'AI 会话转入工单',
+          createdAt: '2026-06-20T10:00:00'
+        }
+      ]
+    })
+    listTicketCommentsMock.mockResolvedValue([
+      {
+        id: 3,
+        ticketId: 8,
+        authorId: 2,
+        commentType: 'AGENT_REPLY',
+        content: '已收到，正在排查。',
+        internal: false,
+        createdAt: '2026-06-20T10:05:00'
+      }
+    ])
+
+    const wrapper = mount(TicketDetailView)
+    await flushPromises()
+
+    expect(wrapper.find('.ticket-hero-panel').exists()).toBe(true)
+    expect(wrapper.find('.ticket-context-panel').exists()).toBe(true)
+    expect(wrapper.find('.ticket-comments-panel').exists()).toBe(true)
+    expect(wrapper.find('.ticket-sla-panel').exists()).toBe(true)
+    expect(wrapper.find('.ticket-action-panel').exists()).toBe(true)
+    expect(wrapper.find('.ticket-flow-panel').exists()).toBe(true)
+  })
 })
