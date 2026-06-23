@@ -11,11 +11,14 @@ import {
   closeTicket,
   confirmCloseTicket,
   createTicketComment,
+  getAssignmentRecommendation,
   getTicket,
   listTicketComments,
   reopenTicket,
   resolveTicket,
   startTicket,
+  type AssignmentRecommendation,
+  type SlaStatus,
   type TicketComment,
   type TicketCommentType,
   type TicketDetail,
@@ -39,6 +42,8 @@ const runningAction = ref('')
 const assignees = ref<SystemUser[]>([])
 const selectedAssigneeId = ref('')
 const loadingAssignees = ref(false)
+const recommendation = ref<AssignmentRecommendation | null>(null)
+const loadingRecommendation = ref(false)
 const canWriteAgentComment = computed(
   () => auth.permissions.includes('ticket:process') || auth.permissions.includes('ticket:manage')
 )
@@ -91,12 +96,41 @@ const priorityLabel: Record<TicketPriority, string> = {
   URGENT: '紧急'
 }
 
+const slaLabel: Record<SlaStatus, string> = {
+  ON_TRACK: '正常',
+  DUE_SOON: '即将超时',
+  OVERDUE: '已超时',
+  COMPLETED: '已完成'
+}
+
 function formatStatus(status?: TicketStatus) {
   return status ? statusLabel[status] : '未知'
 }
 
 function formatPriority(priority?: TicketPriority | null) {
   return priority ? priorityLabel[priority] : '未定'
+}
+
+function formatSla(status?: SlaStatus | null) {
+  return status ? slaLabel[status] : '未设置'
+}
+
+function formatRemaining(minutes?: number | null, status?: SlaStatus | null) {
+  if (status === 'COMPLETED') {
+    return '已完成'
+  }
+
+  if (status === 'OVERDUE') {
+    return '已超时'
+  }
+
+  if (minutes == null) {
+    return '未设置截止时间'
+  }
+
+  const hours = Math.floor(minutes / 60)
+  const rest = minutes % 60
+  return hours > 0 ? `剩余 ${hours} 小时 ${rest} 分钟` : `剩余 ${rest} 分钟`
 }
 
 function formatDate(value?: string | null) {
@@ -175,6 +209,27 @@ async function loadAssignees() {
   }
 }
 
+async function loadRecommendation() {
+  if (!canAssignTicket.value) {
+    recommendation.value = null
+    return
+  }
+
+  loadingRecommendation.value = true
+
+  try {
+    recommendation.value = await getAssignmentRecommendation(ticketId.value)
+  } finally {
+    loadingRecommendation.value = false
+  }
+}
+
+function useRecommendedAssignee() {
+  if (recommendation.value?.recommendedAssigneeId) {
+    selectedAssigneeId.value = String(recommendation.value.recommendedAssigneeId)
+  }
+}
+
 async function submitComment() {
   const content = commentContent.value.trim()
 
@@ -239,6 +294,7 @@ async function assignSelectedTicket() {
       ticket.value = { ...ticket.value, ...updated }
     }
     await loadTicket()
+    recommendation.value = null
     selectedAssigneeId.value = ''
     actionComment.value = ''
   } finally {
@@ -248,7 +304,7 @@ async function assignSelectedTicket() {
 
 onMounted(async () => {
   await loadTicket()
-  await loadAssignees()
+  await Promise.all([loadAssignees(), loadRecommendation()])
 })
 </script>
 
@@ -335,6 +391,27 @@ onMounted(async () => {
       <aside class="ticket-detail-side">
         <section class="ticket-detail-panel">
           <div class="panel-heading">
+            <span>SLA 状态</span>
+            <strong>{{ formatSla(ticket.slaStatus) }}</strong>
+          </div>
+          <dl class="ticket-ai-context">
+            <div>
+              <dt>截止时间</dt>
+              <dd>{{ formatDate(ticket.deadlineAt) }}</dd>
+            </div>
+            <div>
+              <dt>剩余时间</dt>
+              <dd>{{ formatRemaining(ticket.slaRemainingMinutes, ticket.slaStatus) }}</dd>
+            </div>
+            <div>
+              <dt>优先级规则</dt>
+              <dd>{{ formatPriority(ticket.priority) }} 优先级按预设 SLA 时限计算</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="ticket-detail-panel">
+          <div class="panel-heading">
             <span>状态动作</span>
           </div>
           <label class="action-comment-field">
@@ -348,6 +425,18 @@ onMounted(async () => {
           </label>
           <div v-if="canAssignTicket" class="ticket-assignment-form">
             <strong>分配工单</strong>
+            <div class="ticket-recommendation-panel">
+              <strong>智能推荐</strong>
+              <p>{{ loadingRecommendation ? '正在计算推荐坐席' : recommendation?.reason || '暂无可推荐坐席' }}</p>
+              <button
+                v-if="recommendation?.recommendedAssigneeId"
+                data-testid="use-recommended-assignee"
+                type="button"
+                @click="useRecommendedAssignee"
+              >
+                使用推荐坐席
+              </button>
+            </div>
             <label>
               坐席
               <select v-model="selectedAssigneeId" data-testid="assignee-select" :disabled="loadingAssignees">

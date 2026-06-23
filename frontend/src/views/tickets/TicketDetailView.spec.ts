@@ -6,6 +6,7 @@ import {
   assignTicket,
   confirmCloseTicket,
   createTicketComment,
+  getAssignmentRecommendation,
   getTicket,
   listTicketComments,
   reopenTicket,
@@ -28,6 +29,7 @@ vi.mock('../../api/tickets', () => ({
   closeTicket: vi.fn(),
   confirmCloseTicket: vi.fn(),
   createTicketComment: vi.fn(),
+  getAssignmentRecommendation: vi.fn(),
   getTicket: vi.fn(),
   listTicketComments: vi.fn(),
   reopenTicket: vi.fn(),
@@ -41,6 +43,7 @@ vi.mock('../../api/systemAdmin', () => ({
 }))
 
 const assignTicketMock = vi.mocked(assignTicket)
+const getAssignmentRecommendationMock = vi.mocked(getAssignmentRecommendation)
 const getTicketMock = vi.mocked(getTicket)
 const listTicketCommentsMock = vi.mocked(listTicketComments)
 const createTicketCommentMock = vi.mocked(createTicketComment)
@@ -54,6 +57,7 @@ const listSystemUsersMock = vi.mocked(listSystemUsers)
 describe('TicketDetailView', () => {
   beforeEach(() => {
     getTicketMock.mockReset()
+    getAssignmentRecommendationMock.mockReset()
     listTicketCommentsMock.mockReset()
     createTicketCommentMock.mockReset()
     assignTicketMock.mockReset()
@@ -295,6 +299,9 @@ describe('TicketDetailView', () => {
         source: 'AI_SESSION',
         assigneeId: null,
         creatorId: 4,
+        deadlineAt: '2026-06-20T18:00:00',
+        slaStatus: 'DUE_SOON',
+        slaRemainingMinutes: 90,
         createdAt: '2026-06-20T10:00:00',
         flowLogs: []
       })
@@ -330,6 +337,13 @@ describe('TicketDetailView', () => {
       { id: 4, username: 'user', displayName: '普通用户', status: 'ACTIVE', roleIds: [4] },
       { id: 5, username: 'disabled-agent', displayName: '禁用坐席', status: 'DISABLED', roleIds: [3] }
     ])
+    getAssignmentRecommendationMock.mockResolvedValue({
+      recommendedAssigneeId: 3,
+      recommendedUsername: 'agent',
+      recommendedDisplayName: '演示坐席',
+      activeTicketCount: 0,
+      reason: '推荐演示坐席：当前无在办工单，可优先承接'
+    })
     assignTicketMock.mockResolvedValue({
       id: 8,
       ticketNo: 'TK-20260620-0001',
@@ -342,8 +356,16 @@ describe('TicketDetailView', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('分配工单')
+    expect(wrapper.text()).toContain('智能推荐')
+    expect(wrapper.text()).toContain('推荐演示坐席：当前无在办工单，可优先承接')
+    expect(wrapper.text()).toContain('SLA 状态')
+    expect(wrapper.text()).toContain('即将超时')
+    expect(wrapper.text()).toContain('2026-06-20 18:00')
     const assigneeOptions = wrapper.find('[data-testid="assignee-select"]').findAll('option')
     expect(assigneeOptions.map((option) => option.text())).toEqual(['请选择坐席', '演示坐席（agent）'])
+
+    await wrapper.find('[data-testid="use-recommended-assignee"]').trigger('click')
+    expect((wrapper.find('[data-testid="assignee-select"]').element as HTMLSelectElement).value).toBe('3')
 
     await wrapper.find('[data-testid="assignee-select"]').setValue('3')
     await wrapper.find('[data-testid="action-comment"]').setValue('分配给 agent')

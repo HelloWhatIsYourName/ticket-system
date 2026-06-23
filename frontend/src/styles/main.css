@@ -1691,12 +1691,14 @@ select {
 }
 
 .comment-form,
+.ticket-assignment-form,
 .action-comment-field {
   display: grid;
   gap: 10px;
 }
 
 .comment-form label,
+.ticket-assignment-form label,
 .action-comment-field {
   color: #334155;
   font-size: 14px;
@@ -1705,6 +1707,7 @@ select {
 
 .comment-form select,
 .comment-form textarea,
+.ticket-assignment-form select,
 .action-comment-field textarea {
   width: 100%;
   border: 1px solid var(--home-line);
@@ -1713,7 +1716,8 @@ select {
   color: var(--home-text);
 }
 
-.comment-form select {
+.comment-form select,
+.ticket-assignment-form select {
   min-height: 42px;
   padding: 0 12px;
 }
@@ -1725,6 +1729,7 @@ select {
 }
 
 .comment-form button,
+.ticket-assignment-form button,
 .ticket-action-grid button {
   min-height: 40px;
   border: 0;
@@ -1735,9 +1740,25 @@ select {
 }
 
 .comment-form button:disabled,
+.ticket-assignment-form button:disabled,
 .ticket-action-grid button:disabled {
   cursor: not-allowed;
   opacity: 0.56;
+}
+
+.ticket-recommendation-panel {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  background: #eef2ff;
+}
+
+.ticket-recommendation-panel p {
+  margin: 0;
+  color: #334155;
+  line-height: 1.5;
 }
 
 .ticket-action-grid {

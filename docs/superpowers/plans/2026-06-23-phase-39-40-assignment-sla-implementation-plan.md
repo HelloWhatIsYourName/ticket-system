@@ -1103,7 +1103,7 @@ git commit -m "feat: show ticket sla in lists"
 - Modify: `frontend/src/views/tickets/TicketDetailView.vue`
 - Modify: `frontend/src/views/tickets/TicketDetailView.spec.ts`
 
-- [ ] **Step 1: Write failing detail tests**
+- [x] ⭐ **Step 1: Write failing detail tests**
 
 In `TicketDetailView.spec.ts`, mock `getAssignmentRecommendation`:
 
@@ -1151,7 +1151,7 @@ await wrapper.find('[data-testid="use-recommended-assignee"]').trigger('click')
 expect((wrapper.find('[data-testid="assignee-select"]').element as HTMLSelectElement).value).toBe('3')
 ```
 
-- [ ] **Step 2: Run focused test and verify RED**
+- [x] ⭐ **Step 2: Run focused test and verify RED**
 
 ```bash
 cd frontend
@@ -1160,7 +1160,7 @@ npm run test -- src/views/tickets/TicketDetailView.spec.ts
 
 Expected: FAIL because recommendation API is not called and UI is missing.
 
-- [ ] **Step 3: Implement detail state and recommendation load**
+- [x] ⭐ **Step 3: Implement detail state and recommendation load**
 
 In `TicketDetailView.vue`, import:
 
@@ -1237,7 +1237,7 @@ After successful assignment, set:
 recommendation.value = null
 ```
 
-- [ ] **Step 4: Implement detail template**
+- [x] ⭐ **Step 4: Implement detail template**
 
 Above the assignment select:
 
@@ -1281,17 +1281,17 @@ Add a side panel before flow logs:
 </section>
 ```
 
-- [ ] **Step 5: Run focused test and verify GREEN**
+- [x] ⭐ **Step 5: Run focused test and verify GREEN**
 
 Run command from Step 2.
 
 Expected: PASS.
 
-- [ ] **Step 6: Update plan checkbox**
+- [x] ⭐ **Step 6: Update plan checkbox**
 
 Mark Task 6 `[x] ⭐`.
 
-- [ ] **Step 7: Commit**
+- [x] ⭐ **Step 7: Commit**
 
 ```bash
 git add frontend/src/views/tickets/TicketDetailView.vue frontend/src/views/tickets/TicketDetailView.spec.ts \
